@@ -1,3 +1,5 @@
+[TOC]
+
 # TKernel
 
 ## TKernel 是什么
@@ -94,7 +96,7 @@ DWORD GetVer4() const { return (DWORD)LOWORD(dwProductVersionLS); }
 
 为了方便，存在名为 `Createx` 的函数，可以提供更少的参数创建窗口。
 
-对于一个实例，在窗口销毁前仅能调用一次 Create。
+对于一个实例，在窗口销毁前仅能调用一次 `Create`。
 
 ##### `TDialog::TDialogParam`
 
