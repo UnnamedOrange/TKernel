@@ -22,9 +22,9 @@
 
 #pragma once
 
-#include "kits/TStdInclude.h"
+#include "TStdInclude.h"
 
-#include "kits/TError.h"
+#include "TError.h"
 
 class TWindowBase abstract
 {
