@@ -1,5 +1,3 @@
-// TFileInfo
-
 // Copyright (C) 2018 Orange Software
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -20,7 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+// TFileInfo
+
 // Build 1 in 2018-6-4
+
 #pragma once
 
 #include "TStdInclude.h"

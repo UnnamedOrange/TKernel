@@ -1,5 +1,3 @@
-// TApplication
-
 // Copyright (C) 2018 Orange Software
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,6 +17,8 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+
+// TApplication
 
 #pragma once
 
@@ -95,4 +95,16 @@ public:
 
 public:
 	virtual INT Execute() = 0;
+
+public:
+	// 应该仅在返回 TRUE 时继续
+	BOOL SingleInstance()
+	{
+		if (GUID.empty())
+			return TError(), FALSE;
+		HANDLE hMutex = CreateMutexW(NULL, NULL, GUID.c_str());
+		if (GetLastError() == ERROR_ALREADY_EXISTS)
+			return FALSE;
+		return TRUE;
+	}
 };

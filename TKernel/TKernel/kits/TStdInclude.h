@@ -1,5 +1,3 @@
-// TStdInclude
-
 // Copyright (C) 2018 Orange Software
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,6 +17,8 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+
+// TStdInclude
 
 // include standard headers
 
