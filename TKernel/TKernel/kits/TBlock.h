@@ -51,10 +51,10 @@ class TBlock
 	}
 
 public:
-	TBlock() : pData(), dwSize() {}
-	~TBlock() { Destruct(); }
-	TBlock(const TBlock& b) : TBlock() { (*this) = b; }
-	TBlock(TBlock&& b)
+	TBlock() noexcept : pData(), dwSize() {}
+	~TBlock() noexcept { Destruct(); }
+	TBlock(const TBlock& b) noexcept : TBlock() { (*this) = b; }
+	TBlock(TBlock&& b) noexcept
 	{
 		pData = b.pData;
 		dwSize = b.dwSize;
@@ -81,7 +81,8 @@ public:
 	VOID realloc(DWORD size) { Construct(size); }
 	BOOL empty() const { return !pData; }
 	DWORD size() const { return dwSize; }
-	const BYTE* data() const { return pData; }
+	const VOID* data() const { return pData; }
+	VOID* data() { return pData; }
 	VOID assign(DWORD deltaBegin, LPCVOID source, DWORD size)
 	{
 		std::memcpy(pData + deltaBegin, source, size);

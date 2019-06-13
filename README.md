@@ -18,7 +18,7 @@ Powered by: Orange Software
 
 Version: 3
 
-Build: Alpha
+Build: Alpha 2
 
 ## 更新信息
 
@@ -42,25 +42,26 @@ No information.
 class TApplication abstract;
 ```
 
-你必须继承它。一般你可以只使用默认构造函数，但如果你需要调用某些特定的成员函数，你需要调用以下构造函数：
+你必须继承它。一般你可以只使用默认构造函数。还可以调用以下构造函数：
 
 ```c++
 TApplication(LPCWSTR lpcAppName, LPCWSTR lpcGUID);
 ```
 
-但是建议只使用以上构造函数。
+建议只使用该构造函数。使用默认构造函数将无法使用部分该类的方法。
 
 #### TApplication 的实例数量是有限制的 
 
-你只能在你的代码中声明一个 TApplication，否则将会抛出异常。
+你只能在你的代码中定义一个 TApplication，否则将会抛出异常。
 
 ### `TFileInfo.h`
 
 `TFileInfo.h` 是包含一个继承自 `VS_FIXEDFILEINFO` 的类的头文件. `TFileInfo` 类有两个构造函数。
 
 ```c++
-TFileInfo();
-explicit TFileInfo(LPCWSTR lpcFileName);
+TFileInfo() { GetFileInfo(); }
+explicit TFileInfo(LPCWSTR lpcFileName) { GetFileInfo(lpcFileName); }
+explicit TFileInfo(HINSTANCE hInstance) { GetFileInfo(hInstance); }
 ```
 
 如果你调用第二个构造函数，将会自动获取指定文件名的文件版本信息。如果你调用第一个函数，将会获取你的应用程序对应的文件版本信息（在内部会委托第二个构造函数），如果你需要得到你应用程序对应的版本号，直接使用第一个构造函数。
@@ -76,7 +77,7 @@ DWORD GetVer3() const { return (DWORD)HIWORD(dwProductVersionLS); }
 DWORD GetVer4() const { return (DWORD)LOWORD(dwProductVersionLS); }
 ```
 
-### `TBlock`
+### `TBlock.h`
 
 用于分配内存块。
 
@@ -84,23 +85,26 @@ DWORD GetVer4() const { return (DWORD)LOWORD(dwProductVersionLS); }
 
 #### 没有维护内存池
 
-### `TWindow` 和 `TDialog`
+### `TWindow.h`
 
-用于创建窗口和对话框。
+用于创建窗口和对话框。目前可以使用四个抽象类：`TWindowHost`、`TWindowPopup`、`TDialogBox`、`TCreateDialog`。
 
-`TWindow` 和 `TDialog` 是抽象类，你必须继承它，并且提供它的纯虚函数的实现（可以通过 Visual Studio 的 IntelliSense 获取帮助）。
+所有这些类都是抽象类，你必须继承，并且提供其纯虚函数的实现（可以通过 Visual Studio 的 IntelliSense 获取帮助）。
 
-#### `Create`
+#### 外部接口
 
-在创建完对象后，调用 `Create` 函数创建窗口。**`Create` 函数将会自动注册窗口类**，如果有其它需求，需要在窗口创建后手动修改。（例如窗口图标需要调用其它函数修改）
+这些类各有各的用于创建窗口的外部接口：
 
-为了方便，存在名为 `Createx` 的函数，可以提供更少的参数创建窗口。
+```c++
+HWND TWindowHost::CreateHost();
+HWND TWindowPopup::CreatePopup();
+INT_PTR TDialogBox::DialogueBox(LPCWSTR lpTemplateName, HWND hwndParent);
+HWND TCreateDialog::CreateDialogue(LPCWSTR lpTemplateName, HWND hwndParent);
+```
+
+对于需要注册窗口类的窗口，无需手动创建，类的内部会自动创建。如果有其它需求，需要在窗口创建后手动修改。（例如窗口图标需要调用其它函数修改）
 
 对于一个实例，在窗口销毁前仅能调用一次 `Create`。
-
-##### `TDialog::TDialogParam`
-
-在调用 `TDialog` 的 `Create` 函数时，需要提供类型为 `TDialog::TDialogParam` 的参数。
 
 #### `WndProc`
 
@@ -110,4 +114,53 @@ DWORD GetVer4() const { return (DWORD)LOWORD(dwProductVersionLS); }
 
 #### 注意事项
 
-使用 TWindow 的窗口不能使用 `GWLP_USERDATA`。
+使用 `TWindow.h` 中提供的类的窗口不能使用 `GWLP_USERDATA`。
+
+更多信息，请借助 IntelliSense 参看源代码。
+
+由于需求更新频繁，因此暂时不保证接口不会改变。
+
+### `TDPI.h`
+
+用于换算当前 DPI 下对应的尺寸大小。
+
+```c++
+template <typename T>
+T TDPI<TRUE>::operator() (T in);
+```
+
+类含有一个参数，用于指定是否缓存当前的 DPI，默认为是。因此需要像下面这样定义一个 TDPI 类：
+
+```c++
+TDPI<> dpi; // 与 dpi1 等价
+TDPI<TRUE> dpi1;
+TDPI<FALSE> dpi2;
+```
+
+### `TGdiplus.h`
+
+用于自动加载与卸载 Gdiplus。
+
+直接在任意处作如下定义：
+
+```c++
+TGdiplus _unused;
+```
+
+### `TPrivateFont.h`
+
+用于从数据块中加入私有字体。
+
+#### `TPrivateFont`
+
+向构造函数提供对应的内存块进行创建，可以使用 `placement new`。
+
+#### `TPrivateFontPlus`
+
+用于 Gdiplus，可以获得相应的 `FontFamily`。初始化方法与 `TPrivateFont` 一致。
+
+```c++
+const Gdiplus::FontFamily& TPrivateFontPlus::operator()();
+```
+
+该类继承自 `TPrivateFont`，因此无需同时使用。

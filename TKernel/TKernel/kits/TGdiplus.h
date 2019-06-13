@@ -18,24 +18,37 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-// TKernel
-
-// Alpha Build
+// TGdiplus
 
 #pragma once
-
-#ifndef TKERNEL
-#define TKERNEL
-
-#define TERROR_THROW
-
 #include "TStdInclude.h"
-#include "TApplication.h"
-#include "TFileInfo.h"
-#include "TBlock.h"
-#include "TWindow.h"
-#include "TDPI.h"
-#include "TGdiplus.h"
-#include "TPrivateFont.h" 
-#include "TTimer.h" // not available
-#endif /* !TERNEL */
+
+#include "TError.h"
+
+class TGdiplus final
+{
+	ULONG_PTR gdiplusToken = NULL;
+
+public:
+	TGdiplus()
+	{
+		static BOOL bLoaded;
+		if (bLoaded)
+		{
+			TError();
+			return;
+		}
+		bLoaded = TRUE;
+
+		Gdiplus::GdiplusStartupInput gdiplusStartupInput;
+		Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
+	}
+	~TGdiplus()
+	{
+		if (gdiplusToken)
+		{
+			Gdiplus::GdiplusShutdown(gdiplusToken);
+			gdiplusToken = NULL;
+		}
+	}
+};

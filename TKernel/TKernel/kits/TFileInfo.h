@@ -49,32 +49,42 @@ class TFileInfo : public VS_FIXEDFILEINFO
 #undef assign
 		return *this;
 	}
-	VOID GetFileInfo(LPCWSTR lpcFileName)
+	BOOL GetFileInfo(LPCWSTR lpcFileName)
 	{
 		VS_FIXEDFILEINFO* pffi;
 		// in fact dwHandle is ignored
-		DWORD dwHandle;
+		DWORD dwHandle = 0;
 		// return 0 if failed
 		DWORD dwSize = GetFileVersionInfoSizeW(lpcFileName, &dwHandle);
 		if (!dwSize)
-			TError();
+			return FALSE;
 		BYTE* pBlock = new BYTE[dwSize];
-		GetFileVersionInfoW(lpcFileName, dwHandle, dwSize, pBlock);
+		GetFileVersionInfoW(lpcFileName, 0, dwSize, pBlock);
 		// dwSize is no longer used
-		VerQueryValueW(pBlock, L"\\", (LPVOID*)&pffi, (PUINT)&dwSize);
+		VerQueryValueW(pBlock, L"\\", (LPVOID*)& pffi, (PUINT)& dwSize);
 		*this = *pffi;
 		delete[] pBlock;
+		return TRUE;
 	}
-	VOID GetFileInfo() // get own file info
+	VOID GetFileInfo() // 获取自身文件信息
 	{
-		WCHAR szFileName[MAX_PATH];
-		GetModuleFileNameW(HINST, szFileName, MAX_PATH);
-		GetFileInfo(szFileName);
+		std::vector<WCHAR> strFileName(65536);
+		GetModuleFileNameW(HINST, strFileName.data(), 65536);
+		if (!GetFileInfo(strFileName.data()))
+			TError();
+	}
+	VOID GetFileInfo(HINSTANCE hInstance) // 根据提供的 hInstance 获取版本信息，适用于 DLL
+	{
+		std::vector<WCHAR> strFileName(65536);
+		GetModuleFileNameW(hInstance, strFileName.data(), 65536);
+		if (!GetFileInfo(strFileName.data()))
+			TError();
 	}
 
 public:
 	TFileInfo() { GetFileInfo(); }
 	explicit TFileInfo(LPCWSTR lpcFileName) { GetFileInfo(lpcFileName); }
+	explicit TFileInfo(HINSTANCE hInstance) { GetFileInfo(hInstance); }
 	TFileInfo(const TFileInfo&) = default;
 	TFileInfo(TFileInfo&&) = delete;
 

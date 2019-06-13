@@ -49,15 +49,14 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <functional>
+#include <random>
 
-#ifdef _UNICODE
 #if defined _M_IX86
 #pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='x86' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #elif defined _M_X64
 #pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='amd64' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #else
 #pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
-#endif
 #endif
 
 // Windows Base
@@ -75,6 +74,9 @@
 #include <Psapi.h>
 #include <dwmapi.h>
 
+#include <gdiplus.h>
+#include <d2d1.h>
+
 // link lib
 #pragma comment(lib, "winmm.lib")
 #pragma comment(lib, "version.lib")
@@ -84,6 +86,8 @@
 #pragma comment(lib, "comctl32.lib")
 #pragma comment(lib, "shell32.lib")
 #pragma comment(lib, "dwmapi.lib")
+#pragma comment(lib, "d2d1.lib")
+#pragma comment(lib, "gdiplus.lib")
 
 // HINST
 extern "C" const IMAGE_DOS_HEADER __ImageBase; // &__ImageBase

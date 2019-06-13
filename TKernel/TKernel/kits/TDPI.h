@@ -18,24 +18,76 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-// TKernel
+// TDPI
 
-// Alpha Build
+// DPI Helper
 
 #pragma once
-
-#ifndef TKERNEL
-#define TKERNEL
-
-#define TERROR_THROW
-
 #include "TStdInclude.h"
-#include "TApplication.h"
-#include "TFileInfo.h"
-#include "TBlock.h"
-#include "TWindow.h"
-#include "TDPI.h"
-#include "TGdiplus.h"
-#include "TPrivateFont.h" 
-#include "TTimer.h" // not available
-#endif /* !TERNEL */
+
+#include "TError.h"
+
+// 模板参数决定是否返回之前获取的值，默认为是
+template <BOOL bCached = TRUE>
+class TDPI final
+{
+	static const UINT iRegularDPI = 96;
+	UINT iCntDPI = NULL;
+
+	BOOL bInitialized = FALSE;
+	HMODULE hModule = NULL;
+	std::function<UINT()> __GetDpiForSystem;
+
+	VOID Initialize()
+	{
+		if (!bInitialized)
+		{
+			bInitialized = TRUE;
+			if (hModule = LoadLibraryW(L"user32.dll"))
+				__GetDpiForSystem = GetProcAddress(hModule, "GetDpiForSystem");
+		}
+	}
+
+	UINT GetCurrentDPI()
+	{
+		if (!bInitialized)
+			Initialize();
+
+		if (!bCached || !iCntDPI)
+		{
+			if (__GetDpiForSystem)
+			{
+				return iCntDPI = __GetDpiForSystem();
+			}
+			else
+			{
+				HDC hdc = GetDC(NULL);
+				UINT ret = GetDeviceCaps(hdc, LOGPIXELSX);
+				ReleaseDC(NULL, hdc);
+				return iCntDPI = ret;
+			}
+		}
+		else
+		{
+			return iCntDPI;
+		}
+	}
+
+public:
+	TDPI() { Initialize(); }
+	~TDPI()
+	{
+		if (hModule)
+		{
+			FreeLibrary(hModule);
+			hModule = NULL;
+		}
+	}
+
+public:
+	template <typename T>
+	T operator() (T in)
+	{
+		return (T)(in * ((double)GetCurrentDPI() / iRegularDPI));
+	}
+};

@@ -23,7 +23,7 @@
 #pragma once
 
 #ifdef TERROR_THROW
-#define TError() throw
+#define TError() VOID(throw)
 #else
 #define TError() (VOID())
 #endif /* TERROR_THROW */
