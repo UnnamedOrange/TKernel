@@ -18,12 +18,40 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-// TError
+// TMessage
+
+// Window Message Manager, Singleton
 
 #pragma once
+#include "TStdInclude.hpp"
 
-#ifdef TERROR_THROW
-#define TError() VOID(throw)
-#else
-#define TError() (VOID())
-#endif /* TERROR_THROW */
+class TMessage final
+{
+	UINT rec = 0;
+	std::unordered_map<std::wstring, UINT> reg;
+	TMessage() = default;
+
+	UINT __Register(const std::wstring& name)
+	{
+		try
+		{
+			return reg.at(name);
+		}
+		catch (const std::exception&)
+		{
+			return reg[name] = WM_APP + rec++;
+		}
+	}
+
+private:
+	static TMessage& Singleton()
+	{
+		static TMessage instance;
+		return instance;
+	}
+public:
+	static UINT Register(const std::wstring& name)
+	{
+		return Singleton().__Register(name);
+	}
+};

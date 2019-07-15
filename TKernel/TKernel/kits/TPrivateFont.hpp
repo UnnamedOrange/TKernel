@@ -23,10 +23,9 @@
 // Private font loader
 
 #pragma once
-#include "TStdInclude.h"
+#include "TStdInclude.hpp"
 
-#include "TError.h"
-#include "TBlock.h"
+#include "TBlock.hpp"
 
 class TPrivateFont
 {
@@ -39,7 +38,7 @@ private:
 	VOID _RegisterFont()
 	{
 		if (data.empty()) return;
-		DWORD pNumFonts = NULL;
+		DWORD pNumFonts = 0;
 		fHandle = AddFontMemResourceEx(data.data(), data.size(), NULL, &pNumFonts);
 	}
 	VOID _UnregisterFont()

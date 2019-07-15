@@ -22,13 +22,12 @@
 
 #pragma once
 
-#include "TStdInclude.h"
+#include "TStdInclude.hpp"
 
-#include "TError.h"
-#include "TFileInfo.h"
-#include "TBlock.h"
+#include "TFileInfo.hpp"
+#include "TBlock.hpp"
 
-class TApplication // abstract
+class TApplication
 {
 	HINSTANCE hInstance;
 	TFileInfo FileInfo;
@@ -41,7 +40,7 @@ private:
 	{
 		static BOOL bUsedApplicationClass;
 		if (bUsedApplicationClass)
-			throw;
+			throw std::runtime_error("Only one instance can you hold.");
 		bUsedApplicationClass = TRUE;
 	}
 	VOID BuiltinGetCommandLine()
@@ -79,11 +78,11 @@ public:
 	{
 		TBlock block;
 		HRSRC hResInfo = FindResourceW(hInstance, lpcResourceName, lpcTypeName);
-		if (!hResInfo) return TError(), block;
+		if (!hResInfo) return throw std::exception(), block;
 		HGLOBAL hResource = ::LoadResource(hInstance, hResInfo);
-		if (!hResource) return TError(), block;
+		if (!hResource) return throw std::exception(), block;
 		DWORD dwSize = SizeofResource(hInstance, hResInfo);
-		if (!dwSize) return block;
+		if (!dwSize) return throw std::exception(), block;
 
 		LPVOID p = LockResource(hResource);
 		block.realloc(dwSize);
@@ -101,8 +100,8 @@ public:
 	BOOL SingleInstance()
 	{
 		if (GUID.empty())
-			return TError(), FALSE;
-		HANDLE hMutex = CreateMutexW(NULL, NULL, GUID.c_str());
+			return throw std::runtime_error("A GUID is needed."), FALSE;
+		HANDLE hMutex = CreateMutexW(nullptr, FALSE, GUID.c_str());
 		if (GetLastError() == ERROR_ALREADY_EXISTS)
 			return FALSE;
 		return TRUE;

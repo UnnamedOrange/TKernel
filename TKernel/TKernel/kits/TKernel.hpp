@@ -27,15 +27,14 @@
 #ifndef TKERNEL
 #define TKERNEL
 
-#define TERROR_THROW
-
-#include "TStdInclude.h"
-#include "TApplication.h"
-#include "TFileInfo.h"
-#include "TBlock.h"
-#include "TWindow.h"
-#include "TDPI.h"
-#include "TGdiplus.h"
-#include "TPrivateFont.h" 
-#include "TTimer.h" // not available
-#endif /* !TERNEL */
+#include "TStdInclude.hpp"
+#include "TApplication.hpp"
+#include "TFileInfo.hpp"
+#include "TBlock.hpp"
+#include "TWindow.hpp"
+#include "TDPI.hpp"
+#include "TGdiplus.hpp"
+#include "TPrivateFont.hpp" 
+#include "TTimer.hpp"
+#include "TMessage.hpp"
+#endif /* !TKERNEL */

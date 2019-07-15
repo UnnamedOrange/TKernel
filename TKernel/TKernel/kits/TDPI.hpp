@@ -20,15 +20,11 @@
 
 // TDPI
 
-// DPI Helper
+// DPI Helper, Singleton
 
 #pragma once
-#include "TStdInclude.h"
+#include "TStdInclude.hpp"
 
-#include "TError.h"
-
-// 模板参数决定是否返回之前获取的值，默认为是
-template <BOOL bCached = TRUE>
 class TDPI final
 {
 	static const UINT iRegularDPI = 96;
@@ -47,13 +43,12 @@ class TDPI final
 				__GetDpiForSystem = GetProcAddress(hModule, "GetDpiForSystem");
 		}
 	}
-
 	UINT GetCurrentDPI()
 	{
 		if (!bInitialized)
 			Initialize();
 
-		if (!bCached || !iCntDPI)
+		if (!iCntDPI)
 		{
 			if (__GetDpiForSystem)
 			{
@@ -72,9 +67,9 @@ class TDPI final
 			return iCntDPI;
 		}
 	}
+	TDPI() { Initialize(); }
 
 public:
-	TDPI() { Initialize(); }
 	~TDPI()
 	{
 		if (hModule)
@@ -84,10 +79,17 @@ public:
 		}
 	}
 
+private:
+	static TDPI& Singleton()
+	{
+		static TDPI instance;
+		return instance;
+	}
 public:
 	template <typename T>
-	T operator() (T in)
+	static T dpi(T in)
 	{
-		return (T)(in * ((double)GetCurrentDPI() / iRegularDPI));
+		TDPI& tdpi = Singleton();
+		return (T)(in * ((double)tdpi.GetCurrentDPI() / tdpi.iRegularDPI));
 	}
 };

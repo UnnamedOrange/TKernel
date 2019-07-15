@@ -9,7 +9,7 @@
 ## 如何使用 TKernel
 
 ```c++
-#include "TKernel.h" // However, you need to input the correct directory of it.
+#include "TKernel.hpp" // However, you need to input the correct directory of it.
 ```
 
 ## 关于
@@ -18,7 +18,7 @@ Powered by: Orange Software
 
 Version: 3
 
-Build: Alpha 2
+Build: Alpha 3
 
 ## 更新信息
 
@@ -30,13 +30,13 @@ No information.
 
 更多指令可以通过 Visual Studio 的 IntelliSense 了解。
 
-### `TKernel.h`
+### `TKernel.hpp`
 
 包含其它关键文件。
 
-### `TApplication.h`
+### `TApplication.hpp`
 
-`TApplication.h` 是一个用于管理你的应用程序的头文件。它包含了一个抽象类：
+`TApplication.hpp` 是一个用于管理你的应用程序的头文件。它包含了一个抽象类：
 
 ```c++
 class TApplication abstract;
@@ -54,9 +54,9 @@ TApplication(LPCWSTR lpcAppName, LPCWSTR lpcGUID);
 
 你只能在你的代码中定义一个 TApplication，否则将会抛出异常。
 
-### `TFileInfo.h`
+### `TFileInfo.hpp`
 
-`TFileInfo.h` 是包含一个继承自 `VS_FIXEDFILEINFO` 的类的头文件. `TFileInfo` 类有两个构造函数。
+`TFileInfo.hpp` 是包含一个继承自 `VS_FIXEDFILEINFO` 的类的头文件. `TFileInfo` 类有两个构造函数。
 
 ```c++
 TFileInfo() { GetFileInfo(); }
@@ -77,7 +77,7 @@ DWORD GetVer3() const { return (DWORD)HIWORD(dwProductVersionLS); }
 DWORD GetVer4() const { return (DWORD)LOWORD(dwProductVersionLS); }
 ```
 
-### `TBlock.h`
+### `TBlock.hpp`
 
 用于分配内存块。
 
@@ -85,24 +85,17 @@ DWORD GetVer4() const { return (DWORD)LOWORD(dwProductVersionLS); }
 
 #### 没有维护内存池
 
-### `TWindow.h`
+### `TWindow.hpp`
 
-用于创建窗口和对话框。目前可以使用四个抽象类：`TWindowHost`、`TWindowPopup`、`TDialogBox`、`TCreateDialog`。
+用于创建窗口和对话框。目前可以使用五个抽象类：`TWindowHost`、`TWindowPopup`、`TWindowChild`、`TDialogBox`、`TCreateDialog`。
 
 所有这些类都是抽象类，你必须继承，并且提供其纯虚函数的实现（可以通过 Visual Studio 的 IntelliSense 获取帮助）。
 
 #### 外部接口
 
-这些类各有各的用于创建窗口的外部接口：
+调用 `Create()` 来创建窗口。
 
-```c++
-HWND TWindowHost::CreateHost();
-HWND TWindowPopup::CreatePopup();
-INT_PTR TDialogBox::DialogueBox(LPCWSTR lpTemplateName, HWND hwndParent);
-HWND TCreateDialog::CreateDialogue(LPCWSTR lpTemplateName, HWND hwndParent);
-```
-
-对于需要注册窗口类的窗口，无需手动创建，类的内部会自动创建。如果有其它需求，需要在窗口创建后手动修改。（例如窗口图标需要调用其它函数修改）
+对于需要注册窗口类的窗口，无需手动注册，类的内部会自动创建。如果需要手动注册，调用 `RegisterClasses()`。如果有其它需求，需要在窗口创建后手动修改。（例如窗口图标需要调用其它函数修改）
 
 对于一个实例，在窗口销毁前仅能调用一次 `Create`。
 
@@ -114,30 +107,24 @@ HWND TCreateDialog::CreateDialogue(LPCWSTR lpTemplateName, HWND hwndParent);
 
 #### 注意事项
 
-使用 `TWindow.h` 中提供的类的窗口不能使用 `GWLP_USERDATA`。
+使用 `TWindow.hpp` 中提供的类的窗口不能使用 `GWLP_USERDATA`。
 
 更多信息，请借助 IntelliSense 参看源代码。
 
 由于需求更新频繁，因此暂时不保证接口不会改变。
 
-### `TDPI.h`
+### `TDPI.hpp`
 
 用于换算当前 DPI 下对应的尺寸大小。
 
 ```c++
 template <typename T>
-T TDPI<TRUE>::operator() (T in);
+static T dpi(T in);
 ```
 
-类含有一个参数，用于指定是否缓存当前的 DPI，默认为是。因此需要像下面这样定义一个 TDPI 类：
+不能再创建实例，直接调用 `TDPI::dpi()` 即可。
 
-```c++
-TDPI<> dpi; // 与 dpi1 等价
-TDPI<TRUE> dpi1;
-TDPI<FALSE> dpi2;
-```
-
-### `TGdiplus.h`
+### `TGdiplus.hpp`
 
 用于自动加载与卸载 Gdiplus。
 
@@ -147,7 +134,7 @@ TDPI<FALSE> dpi2;
 TGdiplus _unused;
 ```
 
-### `TPrivateFont.h`
+### `TPrivateFont.hpp`
 
 用于从数据块中加入私有字体。
 
@@ -164,3 +151,18 @@ const Gdiplus::FontFamily& TPrivateFontPlus::operator()();
 ```
 
 该类继承自 `TPrivateFont`，因此无需同时使用。
+
+### `TTimer.hpp`
+
+用于创建时钟。有两种方式指定回调函数：
+
+```c++
+TTimer(std::function<void(DWORD dwTime)> func) noexcept;
+VOID operator=(std::function<void(DWORD dwTime)> func);
+```
+
+指定回调函数后，调用 `set` 方法，或 `kill` 方法。注意，需要保证时钟的实例始终存在。
+
+### `TMessage.hpp`
+
+用于自定义消息的自动编码。使用 `TMessage::Register(L"name")` 的形式获取对应的消息值。

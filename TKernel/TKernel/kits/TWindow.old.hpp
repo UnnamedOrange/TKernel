@@ -22,9 +22,7 @@
 
 #pragma once
 
-#include "TStdInclude.h"
-
-#include "TError.h"
+#include "TStdInclude.hpp"
 
 class TWindowBase abstract
 {
@@ -52,6 +50,16 @@ private:
 	std::wstring strClassName;
 public:
 	const std::wstring& GetClsName() { return strClassName; }
+	BOOL SetClsName(const std::wstring& strName) // 在第一次创建前调用，将以设置的类名注册类
+	{
+		if (strClassName.empty())
+		{
+			strClassName = strName;
+			return TRUE;
+		}
+		else
+			return FALSE;
+	}
 
 private:
 	// 内部函数，将作为创建窗口时的第一步，与子类无关
@@ -63,11 +71,11 @@ private:
 		if (!set.count(id.first))
 		{
 			BOOL bIsRegistered = FALSE;
-			if (!_RegisterClasses(id.second, bIsRegistered))
+			if (!_RegisterClasses(strClassName.empty() ? id.second : strClassName, bIsRegistered))
 				return FALSE;
 			if (bIsRegistered) set.insert(id.first);
 		}
-		strClassName = id.second;
+		if (strClassName.empty()) strClassName = id.second;
 		return TRUE;
 	}
 	// 调用 InitInstance 后紧接调用子类提供的该函数
@@ -162,7 +170,9 @@ class TWindowVirtual abstract : public TWindowBaseEx
 public:
 	using TWindowBaseEx::TWindowBaseEx;
 
-protected:
+private:
+	virtual VOID BeforeVirtualProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) = 0;
+	virtual VOID AfterVirtualProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) = 0;
 	static LRESULT CALLBACK VirtualProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 		TWindowVirtual* p = (TWindowVirtual*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
@@ -170,13 +180,14 @@ protected:
 		if (message == WM_CREATE)
 		{
 			p = (TWindowVirtual*)(((LPCREATESTRUCT)lParam)->lpCreateParams);
-			SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)p);
+			SetWindowLongPtrW(hwnd, GWLP_USERDATA, (LONG_PTR)p);
 			p->SetHwnd(hwnd);
 		}
 
 		LRESULT ret;
 		if (p)
 		{
+			p->BeforeVirtualProc(hwnd, message, wParam, lParam);
 			switch (message)
 			{
 				HANDLE_MSG(hwnd, WM_CREATE, p->OnCreate);
@@ -187,8 +198,9 @@ protected:
 				break;
 			}
 			ret = p->WndProc(hwnd, message, wParam, lParam);
+			p->AfterVirtualProc(hwnd, message, wParam, lParam);
 		}
-		else ret = DefWindowProc(hwnd, message, wParam, lParam);
+		else ret = DefWindowProcW(hwnd, message, wParam, lParam);
 
 		if (p && message == WM_DESTROY)
 			p->SetHwnd(NULL);
@@ -225,6 +237,11 @@ class TWindowHost : public TWindowVirtual
 {
 public:
 	using TWindowVirtual::TWindowVirtual;
+
+	// Virtual Proc
+private:
+	virtual VOID BeforeVirtualProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) override {}
+	virtual VOID AfterVirtualProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) override {}
 
 	// 窗口创建参数
 private:
@@ -264,13 +281,18 @@ class TWindowPopup : public TWindowVirtual
 public:
 	using TWindowVirtual::TWindowVirtual;
 
+	// Virtual Proc
+private:
+	virtual VOID BeforeVirtualProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) override {}
+	virtual VOID AfterVirtualProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) override {}
+
 	// 窗口创建参数
 private:
 	struct TWindowPopupParam
 	{
 		HWND hwndHost;
 		TWindowPopupParam() = default;
-		TWindowPopupParam(HWND hwndParent) : hwndHost(hwndParent) {}
+		TWindowPopupParam(HWND hwndHost) : hwndHost(hwndHost) {}
 	};
 	virtual BOOL _Create(PVOID param) override
 	{
@@ -287,9 +309,9 @@ private:
 
 	// 外部接口
 public:
-	HWND CreatePopup(HWND hwndParent)
+	HWND CreatePopup(HWND hwndHost)
 	{
-		Create(&TWindowPopupParam(hwndParent));
+		Create(&TWindowPopupParam(hwndHost));
 		return GetHwnd();
 	}
 
@@ -307,11 +329,55 @@ public:
 	HWND GetHostWindow() { return hwndHost; }
 };
 
+// 子窗口
+class TWindowChild : public TWindowVirtual
+{
+public:
+	using TWindowVirtual::TWindowVirtual;
+
+	// Virtual Proc
+private:
+	virtual VOID BeforeVirtualProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) override {}
+	virtual VOID AfterVirtualProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) override {}
+
+	// 窗口创建参数
+private:
+	struct TWindowChildParam
+	{
+		HWND hwndParent;
+		HMENU id;
+		TWindowChildParam() = default;
+		TWindowChildParam(HWND hwndParent, HMENU id) : hwndParent(hwndParent), id(id) {}
+	};
+	virtual BOOL _Create(PVOID param) override
+	{
+		const TWindowChildParam& p = *((TWindowChildParam*)param);
+		return !!CreateWindowExW(NULL, GetClsName().c_str(), L"",
+			WS_CHILD | WS_VISIBLE,
+			0,
+			0,
+			0,
+			0,
+			p.hwndParent, p.id, HINST, this);
+	}
+
+	// 外部接口
+public:
+	HWND CreateChild(HWND hwndParent, HMENU id)
+	{
+		Create(&TWindowChildParam(hwndParent, id));
+		return GetHwnd();
+	}
+};
+
 // VirtualProc for Dialog
 class TDialogVirtual abstract : public TWindowBaseEx
 {
 	using TWindowBaseEx::TWindowBaseEx;
 
+private:
+	virtual VOID BeforeVirtualProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) = 0;
+	virtual VOID AfterVirtualProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) = 0;
 protected:
 	static INT_PTR CALLBACK VirtualProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
@@ -327,6 +393,7 @@ protected:
 		LRESULT ret;
 		if (p)
 		{
+			p->BeforeVirtualProc(hwnd, message, wParam, lParam);
 			switch (message)
 			{
 			case WM_INITDIALOG: HANDLE_WM_INITDIALOG(hwnd, wParam, lParam,
@@ -353,6 +420,7 @@ protected:
 					p->OnInitDialog(p->initDialogStruct.hwnd,
 						p->initDialogStruct.hwndFocus,
 						p->initDialogStruct.lParam);
+					PostMessageW(hwnd, WM_SIZE, (WPARAM)(UINT)(SIZE_RESTORED), MAKELPARAM((p->iWidth), (p->iHeight)));
 				}
 				break;
 			}
@@ -364,6 +432,7 @@ protected:
 				break;
 			}
 			ret = p->WndProc(hwnd, message, wParam, lParam);
+			p->AfterVirtualProc(hwnd, message, wParam, lParam);
 		}
 		else ret = FALSE;
 
@@ -402,6 +471,11 @@ class TDialogBox abstract : public TDialogVirtual
 public:
 	using TDialogVirtual::TDialogVirtual;
 
+	// Virtual Proc
+private:
+	virtual VOID BeforeVirtualProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) override {}
+	virtual VOID AfterVirtualProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) override {}
+
 	// 窗口创建参数
 private:
 	struct TDialogBoxParam
@@ -435,6 +509,11 @@ class TCreateDialog abstract : public TDialogVirtual
 {
 public:
 	using TDialogVirtual::TDialogVirtual;
+
+	// Virtual Proc
+private:
+	virtual VOID BeforeVirtualProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) override {}
+	virtual VOID AfterVirtualProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) override {}
 
 	// 窗口创建参数
 private:

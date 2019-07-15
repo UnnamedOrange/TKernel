@@ -22,8 +22,56 @@
 
 #pragma once
 
-#include "TStdInclude.h"
+#include "TStdInclude.hpp"
 
-#include "TError.h"
+class TTimer final
+{
+	static std::unordered_map<UINT_PTR, TTimer*>& map()
+	{
+		static std::unordered_map<UINT_PTR, TTimer*> obj;
+		return obj;
+	}
+	static void CALLBACK VirtualProc(HWND hwnd, UINT msg, UINT_PTR nTimerId, DWORD dwTime)
+	{
+		(*map().at(nTimerId)).call(dwTime);
+	}
+	UINT_PTR id = UINT_PTR(-1);
 
-class TTimer;
+	std::function<void(DWORD dwTime)> func;
+
+	VOID call(DWORD dwTime)
+	{
+		if (!func)
+			throw std::runtime_error("no func is specified.");
+		func(dwTime);
+	}
+
+public:
+	TTimer() noexcept = default;
+	TTimer(std::function<void(DWORD dwTime)> func) noexcept : func(func) {}
+	~TTimer() noexcept { kill(); }
+
+	VOID operator=(std::function<void(DWORD dwTime)> func)
+	{
+		this->func = func;
+	}
+
+	VOID set(UINT uElapse, BOOL rightaway)
+	{
+		if (!func)
+			throw std::runtime_error("no func is specified.");
+		kill();
+		id = SetTimer(NULL, 0, uElapse, VirtualProc);
+		map()[id] = this;
+		if (rightaway) call(0);
+	}
+	VOID kill()
+	{
+		if (id != UINT_PTR(-1))
+		{
+			map().erase(id);
+			KillTimer(NULL, id);
+			id = UINT_PTR(-1);
+		}
+	}
+};

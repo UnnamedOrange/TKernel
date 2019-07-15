@@ -21,9 +21,7 @@
 // TBlock
 
 #pragma once
-#include "TStdInclude.h"
-
-#include "TError.h"
+#include "TStdInclude.hpp"
 
 class TBlock
 {
@@ -38,15 +36,15 @@ class TBlock
 		pData = new BYTE[dwSize];
 		if (!pData)
 		{
-			dwSize = NULL;
-			TError();
+			dwSize = 0;
+			throw std::runtime_error("Fail to new (pData).");
 		}
 	}
 	VOID Destruct()
 	{
 		if (!pData) return;
 		delete[] pData;
-		pData = NULL;
+		pData = nullptr;
 		dwSize = 0;
 	}
 
@@ -58,10 +56,16 @@ public:
 	{
 		pData = b.pData;
 		dwSize = b.dwSize;
-		b.pData = NULL;
-		b.dwSize = NULL;
+		b.pData = nullptr;
+		b.dwSize = 0;
 	}
 
+	template <typename T>
+	TBlock(const T& val) : TBlock()
+	{
+		pData = new T(val);
+		dwSize = sizeof(T);
+	}
 	explicit TBlock(DWORD dwSize) : TBlock()
 	{
 		Construct(dwSize);

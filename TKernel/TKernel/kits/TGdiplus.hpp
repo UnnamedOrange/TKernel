@@ -21,13 +21,11 @@
 // TGdiplus
 
 #pragma once
-#include "TStdInclude.h"
-
-#include "TError.h"
+#include "TStdInclude.hpp"
 
 class TGdiplus final
 {
-	ULONG_PTR gdiplusToken = NULL;
+	ULONG_PTR gdiplusToken = 0;
 
 public:
 	TGdiplus()
@@ -35,20 +33,20 @@ public:
 		static BOOL bLoaded;
 		if (bLoaded)
 		{
-			TError();
+			throw std::runtime_error("Another (TGdiplus) is already loaded.");
 			return;
 		}
 		bLoaded = TRUE;
 
 		Gdiplus::GdiplusStartupInput gdiplusStartupInput;
-		Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
+		Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, nullptr);
 	}
 	~TGdiplus()
 	{
 		if (gdiplusToken)
 		{
 			Gdiplus::GdiplusShutdown(gdiplusToken);
-			gdiplusToken = NULL;
+			gdiplusToken = 0;
 		}
 	}
 };
