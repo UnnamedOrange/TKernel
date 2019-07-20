@@ -25,28 +25,42 @@
 
 class TGdiplus final
 {
-	ULONG_PTR gdiplusToken = 0;
+	static ULONG_PTR& GetGdiplusToken()
+	{
+		static ULONG_PTR GdiplusToken = 0;
+		return GdiplusToken;
+	}
+	static int& GetRefCount()
+	{
+		static int RefCount = 0;
+		return RefCount;
+	}
+	static VOID Load()
+	{
+		Gdiplus::GdiplusStartupInput gdiplusStartupInput;
+		Gdiplus::GdiplusStartup(&GetGdiplusToken(), &gdiplusStartupInput, nullptr);
+	}
+	static VOID Unload()
+	{
+		auto& token = GetGdiplusToken();
+		if (token)
+		{
+			Gdiplus::GdiplusShutdown(token);
+			token = 0;
+		}
+	}
 
 public:
 	TGdiplus()
 	{
-		static BOOL bLoaded;
-		if (bLoaded)
-		{
-			throw std::runtime_error("Another (TGdiplus) is already loaded.");
-			return;
-		}
-		bLoaded = TRUE;
-
-		Gdiplus::GdiplusStartupInput gdiplusStartupInput;
-		Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, nullptr);
+		if (!GetRefCount())
+			Load();
+		GetRefCount()++;
 	}
 	~TGdiplus()
 	{
-		if (gdiplusToken)
-		{
-			Gdiplus::GdiplusShutdown(gdiplusToken);
-			gdiplusToken = 0;
-		}
+		GetRefCount()--;
+		if (!GetRefCount())
+			Unload();
 	}
 };

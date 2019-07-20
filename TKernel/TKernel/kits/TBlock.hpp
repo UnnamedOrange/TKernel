@@ -60,12 +60,6 @@ public:
 		b.dwSize = 0;
 	}
 
-	template <typename T>
-	TBlock(const T& val) : TBlock()
-	{
-		pData = new T(val);
-		dwSize = sizeof(T);
-	}
 	explicit TBlock(DWORD dwSize) : TBlock()
 	{
 		Construct(dwSize);

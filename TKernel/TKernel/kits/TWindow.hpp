@@ -125,7 +125,8 @@ public:
 
 	// 预窗口过程
 private:
-	int __iWidth, __iHeight;
+	int __iWidth = NULL;
+	int __iHeight = NULL;
 protected:
 	VOID _PreProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
@@ -172,10 +173,19 @@ public:
 
 	// Host 支持
 private:
-	HWND __hwndHost;
+	HWND __hwndHost = NULL;
 public:
 	VOID SetHost(HWND host) { __hwndHost = host; }
 	HWND GetHost() const { return __hwndHost; }
+
+	// 置窗口到中心
+public:
+	VOID CenterizeWindow()
+	{
+		int cxS = GetSystemMetrics(SM_CXSCREEN);
+		int cyS = GetSystemMetrics(SM_CYSCREEN);
+		MoveWindow(GetHwnd(), (cxS - iWidth) >> 1, (cyS - iHeight) >> 1, iWidth, iHeight, TRUE);
+	}
 };
 
 class TWindowHost : public TWindow
@@ -214,7 +224,7 @@ class TWindowHost : public TWindow
 	{
 		TWindowHost* p = (TWindowHost*)GetWindowLongPtrW(hwnd, GWLP_USERDATA);
 
-		if (message == WM_CREATE)
+		if (message == WM_NCCREATE)
 		{
 			p = (TWindowHost*)(((LPCREATESTRUCT)lParam)->lpCreateParams);
 			SetWindowLongPtrW(hwnd, GWLP_USERDATA, (LONG_PTR)p);
@@ -341,7 +351,7 @@ class TWindowPopup : public TWindow
 	{
 		TWindowPopup* p = (TWindowPopup*)GetWindowLongPtrW(hwnd, GWLP_USERDATA);
 
-		if (message == WM_CREATE)
+		if (message == WM_NCCREATE)
 		{
 			p = (TWindowPopup*)(((LPCREATESTRUCT)lParam)->lpCreateParams);
 			SetWindowLongPtrW(hwnd, GWLP_USERDATA, (LONG_PTR)p);

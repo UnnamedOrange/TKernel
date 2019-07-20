@@ -68,15 +68,39 @@ class TFileInfo : public VS_FIXEDFILEINFO
 	{
 		std::vector<WCHAR> strFileName(65536);
 		GetModuleFileNameW(HINST, strFileName.data(), 65536);
-		if (!GetFileInfo(strFileName.data()))
-			throw std::runtime_error("Fail to get own file info.");
+		try
+		{
+			if (!GetFileInfo(strFileName.data()))
+				throw std::logic_error("Fail to get own file info.");
+		}
+		catch (const std::logic_error&)
+		{
+#ifdef _DEBUG
+			MessageBoxW(NULL, L"TKernel doesn't find the version info of your "
+				"application. It is recommended that you attach the version "
+				"info in the resource file. This message won't show up if the "
+				"(_DEBUG) isn't defined.", L"Warning", MB_ICONWARNING);
+#endif
+		}
 	}
 	VOID GetFileInfo(HINSTANCE hInstance) // 根据提供的 hInstance 获取版本信息，适用于 DLL
 	{
 		std::vector<WCHAR> strFileName(65536);
 		GetModuleFileNameW(hInstance, strFileName.data(), 65536);
-		if (!GetFileInfo(strFileName.data()))
-			throw std::runtime_error("Fail to get own file info");
+		try
+		{
+			if (!GetFileInfo(strFileName.data()))
+				throw std::logic_error("Fail to get own file info");
+		}
+		catch (const std::logic_error&)
+		{
+#ifdef _DEBUG
+			MessageBoxW(NULL, L"TKernel doesn't find the version info of your "
+				"application. It is recommended that you attach the version "
+				"info in the resource file. This message won't show up if the "
+				"(_DEBUG) isn't defined.", L"Warning", MB_ICONWARNING);
+#endif
+		}
 	}
 
 public:

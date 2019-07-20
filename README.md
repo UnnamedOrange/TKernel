@@ -18,7 +18,7 @@ Powered by: Orange Software
 
 Version: 3
 
-Build: Alpha 3
+Build: Alpha 4
 
 ## 更新信息
 
@@ -87,6 +87,10 @@ DWORD GetVer4() const { return (DWORD)LOWORD(dwProductVersionLS); }
 
 ### `TWindow.hpp`
 
+> 在 Alpha 4 中，增加了 `CenterizeWindow` 方法。
+>
+> 在 Alpha 4 中，对于非对话框的窗口，第一个收到的消息改为 `WM_NCCREATE`。在 Alpha 3 及以前版本，第一个收到的消息为 `WM_CREATE`。
+
 用于创建窗口和对话框。目前可以使用五个抽象类：`TWindowHost`、`TWindowPopup`、`TWindowChild`、`TDialogBox`、`TCreateDialog`。
 
 所有这些类都是抽象类，你必须继承，并且提供其纯虚函数的实现（可以通过 Visual Studio 的 IntelliSense 获取帮助）。
@@ -103,7 +107,7 @@ DWORD GetVer4() const { return (DWORD)LOWORD(dwProductVersionLS); }
 
 `WndProc` 是一个纯虚函数，用于实现窗口过程。你需要像使用一般的 WndProc（或 DialogProc） 一样使用它。
 
-无法处理调用 `WM_CREATE`（或 `WM_INITDIALOG`）之前发送到窗口的消息，幸运的是这些信息也不大重要。可以保证的是 `WM_DESTROY` 是最后一条发送给这个函数的消息。
+无法处理调用 `WM_NCCREATE`（或 `WM_INITDIALOG`）之前发送到窗口的消息，幸运的是这些信息也不大重要。可以保证的是 `WM_DESTROY` 是最后一条发送给这个函数的消息。
 
 #### 注意事项
 
@@ -125,6 +129,8 @@ static T dpi(T in);
 不能再创建实例，直接调用 `TDPI::dpi()` 即可。
 
 ### `TGdiplus.hpp`
+
+> 在 Alpha 4 中，支持在多处定义。Alpha 3 及以前版本仅支持在一处定义。
 
 用于自动加载与卸载 Gdiplus。
 
