@@ -172,3 +172,7 @@ VOID operator=(std::function<void(DWORD dwTime)> func);
 ### `TMessage.hpp`
 
 用于自定义消息的自动编码。使用 `TMessage::Register(L"name")` 的形式获取对应的消息值。
+
+### `TCollection.hpp`
+
+用于在 `Appdata\\\Local` 中创建应用程序的文件夹以及文件管理。

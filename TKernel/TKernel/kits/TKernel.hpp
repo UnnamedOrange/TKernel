@@ -37,4 +37,5 @@
 #include "TPrivateFont.hpp" 
 #include "TTimer.hpp"
 #include "TMessage.hpp"
+#include "TCollection.hpp"
 #endif /* !TKERNEL */
