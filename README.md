@@ -12,21 +12,47 @@
 #include "TKernel.hpp" // However, you need to input the correct directory of it.
 ```
 
+在 <https://github.com/UnnamedOrange/Blur> 有一个使用 TKernel 的项目。该项目用于演示 TKernel 的使用方法。由于精力有限，没有处理内存泄漏的问题。
+
 ## 关于
 
 Powered by: Orange Software
 
 Version: 3
 
-Build: Alpha 4
+Build: Alpha 6
 
-## 更新信息
+## What's new
 
-### Alpha Build
+### Alpha 6
 
-No information.
+#### TKERNEL_WINVER 宏
+
+目前 TKernel 含有较高版本的 Windows 才拥有的 API。为了兼容性，可以指定 `TKERNEL_WINVER` 宏：
+
+```c++
+#define TKERNEL_WINVER 7		// Windows 7
+#define TKERNEL_WINVER 10		// Windows 10
+#define TKERNEL_WINVER 1903		// Windows 10 1903
+```
+
+#### 完全的高 DPI 支持
+
+在 Windows 10 1607 及以上版本，可以使用完全的高 DPI 支持。`TWindow` 集成了完全的高 DPI 支持，并且将计算尺寸的函数命名为 `dpi`。这意味着 `TDPI` 可以被抛弃，不过你仍然可以使用 `TDPI`。为了兼容性，当 `TKERNEL_WINVER < 1607` 时，该函数内部将调用 `TDPI`，否则该函数将使用系统消息传递的值。你也可以使用 `TDPI::dpi` 的重载函数，不过这样做的性能不如直接使用 `TWindow` 的 `dpi` 函数。
+
+为了使应用程序正常运行，需要取消设置项目中的 DPI 识别功能。
+
+#### `TOpenSaveDialog`
+
+可以较为方便地使用打开、保存对话框。
+
+#### `TValue`
+
+对动态类型提供了少量的支持。
 
 ## 指令
+
+> 自 Alpha 6 起不再更新《指令》。
 
 更多指令可以通过 Visual Studio 的 IntelliSense 了解。
 
@@ -175,4 +201,4 @@ VOID operator=(std::function<void(DWORD dwTime)> func);
 
 ### `TCollection.hpp`
 
-用于在 `Appdata\\\Local` 中创建应用程序的文件夹以及文件管理。
+用于在 `Appdata\\Local` 中创建应用程序的文件夹以及文件管理。

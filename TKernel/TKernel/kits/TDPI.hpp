@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Orange Software
+// Copyright (c) 2018-2019 Orange Software
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files(the "Software"), to deal
@@ -91,5 +91,11 @@ public:
 	{
 		TDPI& tdpi = Singleton();
 		return (T)(in * ((double)tdpi.GetCurrentDPI() / tdpi.iRegularDPI));
+	}
+	template <typename T>
+	static T dpi(HWND hwnd, T in)
+	{
+		TDPI& tdpi = Singleton();
+		return (T)(in * ((double)GetDpiForWindow(hwnd) / tdpi.iRegularDPI));
 	}
 };

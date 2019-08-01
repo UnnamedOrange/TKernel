@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Orange Software
+// Copyright (c) 2018-2019 Orange Software
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files(the "Software"), to deal
@@ -20,12 +20,16 @@
 
 // TKernel
 
-// Alpha Build
+// Alpha 6
 
 #pragma once
 
 #ifndef TKERNEL
 #define TKERNEL
+
+#ifndef TKERNEL_WINVER
+#define TKERNEL_WINVER 1903
+#endif
 
 #include "TStdInclude.hpp"
 #include "TApplication.hpp"
@@ -37,5 +41,7 @@
 #include "TPrivateFont.hpp" 
 #include "TTimer.hpp"
 #include "TMessage.hpp"
-#include "TCollection.hpp"
+#include "TCollection.hpp" // Alpha 4
+#include "TOpenSaveDialog.hpp" // Alpha 5
+#include "TValue.hpp" // Alpha 5
 #endif /* !TKERNEL */

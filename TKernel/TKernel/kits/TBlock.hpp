@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Orange Software
+// Copyright (c) 2018-2019 Orange Software
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files(the "Software"), to deal
@@ -75,6 +75,15 @@ public:
 		}
 		return *this;
 	}
+	template<typename T>
+	TBlock& operator=(const T& b)
+	{
+		if (size() != sizeof(T))
+			Construct(sizeof(T));
+		new (data()) T(b);
+		return *this;
+	}
+
 	VOID clear() { Destruct(); }
 	VOID realloc(DWORD size) { Construct(size); }
 	BOOL empty() const { return !pData; }

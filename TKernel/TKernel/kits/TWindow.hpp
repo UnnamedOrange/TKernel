@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Orange Software
+// Copyright (c) 2018-2019 Orange Software
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files(the "Software"), to deal
@@ -135,6 +135,10 @@ protected:
 		case WM_CREATE:
 		case WM_INITDIALOG:
 		{
+#if TKERNEL_WINVER >= 1607
+			__dpi = GetDpiForWindow(hwnd);
+#endif
+
 			PostMessageW(GetHost(), WM_NOTIFY_HOST_CREATE, (WPARAM)this, 0);
 
 			RECT rect;
@@ -150,6 +154,17 @@ protected:
 					__iWidth = cx;
 					__iHeight = cy;
 				});
+			break;
+		case WM_NCCREATE:
+		{
+#if TKERNEL_WINVER >= 1607
+			EnableNonClientDpiScaling(hwnd);
+#endif
+			break;
+		}
+		case WM_DPICHANGED:
+			__OnDPIChanged(wParam, lParam);
+			break;
 		default:
 			break;
 		}
@@ -185,6 +200,42 @@ public:
 		int cxS = GetSystemMetrics(SM_CXSCREEN);
 		int cyS = GetSystemMetrics(SM_CYSCREEN);
 		MoveWindow(GetHwnd(), (cxS - iWidth) >> 1, (cyS - iHeight) >> 1, iWidth, iHeight, TRUE);
+	}
+
+	// 每个窗口 DPI 支持
+private:
+	int __dpi = USER_DEFAULT_SCREEN_DPI;
+	VOID __OnDPIChanged(WPARAM wParam, LPARAM lParam)
+	{
+		EnumChildWindows(GetHwnd(), [](HWND hwnd, LPARAM wParam)->BOOL
+			{
+				SendMessageW(hwnd, WM_DPICHANGED, wParam, NULL);
+				return TRUE;
+			}, wParam);
+
+		__dpi = LOWORD(wParam);
+		if (lParam)
+		{
+			RECT* const prcNewWindow = (RECT*)lParam;
+			SetWindowPos(GetHwnd(),
+				NULL,
+				prcNewWindow->left,
+				prcNewWindow->top,
+				prcNewWindow->right - prcNewWindow->left,
+				prcNewWindow->bottom - prcNewWindow->top,
+				SWP_NOZORDER | SWP_NOACTIVATE);
+		}
+	}
+public:
+	template <typename T>
+	T dpi(const T& val)
+	{
+#if TKERNEL_WINVER >= 1609
+		double factor = (double)__dpi / USER_DEFAULT_SCREEN_DPI;
+#else
+		double factor = (double)TDPI::dpi() / USER_DEFAULT_SCREEN_DPI;
+#endif
+		return (T)(val * factor);
 	}
 };
 
@@ -286,7 +337,7 @@ private:
 public:
 	CreateParam& AccessParam() { return param; }
 
-private:
+protected:
 	struct SubwindowExtraInfo
 	{
 		BOOL bAutoErase = TRUE;
@@ -313,6 +364,15 @@ private:
 	int nAliveSubwindow = 0;
 public:
 	BOOL bAutoDestroySelf = TRUE;
+
+public:
+	UINT WM_ACTIVATEHOST = TMessage::Register(L"WM_ACTIVATEHOST");
+	VOID ActivateHost()
+	{
+		RegisterClasses();
+		HWND hwnd = FindWindowW(GetClsName().c_str(), nullptr);
+		PostMessageW(hwnd, WM_ACTIVATEHOST, NULL, NULL);
+	}
 };
 
 class TWindowPopup : public TWindow

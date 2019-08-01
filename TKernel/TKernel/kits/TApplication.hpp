@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Orange Software
+// Copyright (c) 2018-2019 Orange Software
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files(the "Software"), to deal
@@ -59,6 +59,9 @@ public:
 		hInstance = HINST;
 		BuiltinVerifySingleTApplication();
 		BuiltinGetCommandLine();
+#if TKERNEL_WINVER >= 1703
+		SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+#endif
 	}
 	TApplication(LPCWSTR lpcAppName, LPCWSTR lpcGUID) : TApplication()
 	{
