@@ -18,88 +18,223 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-// TWindow
-
 #pragma once
+
+#if TKERNEL_WINVER > 0
 
 #include "TStdInclude.hpp"
 
-#include "TMessage.hpp"
+// #include "TMessage.hpp"
 
-class __TWindowBase
+class TWindow
 {
-	// ´°¿Ú¾ä±úÏà¹Ø
+	// çª—å£å¥æŸ„
 private:
-	HWND __hWnd = NULL;
-protected:
-	VOID _SetHwnd(HWND hwnd) { __hWnd = hwnd; } // WM_DESTROY ºóÓ¦ÉèÎª 0
+	HWND __hwnd;
 public:
-	HWND GetHwnd() { return __hWnd; }
+	HWND GetHwnd() const { return __hwnd; }
 
-	// ÄÚ²¿´°¿ÚÀà
+
+	// å±æ€§å­—å…¸
+private:
+	using KeyValPair = std::pair<std::wstring, std::wstring>;
+	std::unordered_map<std::wstring, std::wstring> property_dict;
 public:
-	std::pair<PVOID, std::wstring> __GetIdentity()
+	std::wstring& operator[](const std::wstring& key)
 	{
-		auto vptr = *((PVOID*)this); // È¡ this Ö¸ÏòµÄÄÚÈİµÄÇ° 8 ¸ö×Ö½Ú£¬¼´Ğéº¯Êı±íµÄÖ¸Õë
+		return property_dict[key];
+	}
+	const std::wstring& operator[](const std::wstring& key) const
+	{
+		return property_dict.at(key);
+	}
+
+
+	// property åŠ©æ‰‹å‡½æ•°
+protected:
+	std::wstring __class_name__{ L"__class_name__" };				// çª—å£ç±»å
+	std::wstring __register_classes__{ L"__register_classes__" };	// æ˜¯å¦æ³¨å†Œçª—å£ç±»
+	std::wstring __hInstance__{ L"__hInstance__" };					// åº”ç”¨ç¨‹åºå®ä¾‹å¥æŸ„
+	std::wstring __class_style__{ L"__class_style__" };				// çª—å£ç±»æ ·å¼
+	std::wstring __hIcon__{ L"__hIcon__" };							// hIcon å‚æ•°
+	std::wstring __hIconSm__{ L"__hIconSm__" };						// hIconSm å‚æ•°
+public:
+	void property_int64(const std::wstring& key, __int64 val)
+	{
+		wchar_t buffer[24];
+		swprintf_s(buffer, L"%lld", val);
+		operator[](key) = buffer;
+	}
+	__int64 property_int64(const std::wstring& key) const
+	{
+		__int64 ret;
+		swscanf_s(operator[](key).c_str(), L"%lld", &ret);
+		return ret;
+	}
+
+	void property__class_name__(const std::wstring& name) // è®¾ç½®çª—å£ç±»å
+	{
+		operator[](__class_name__) = name;
+	}
+	const std::wstring& property__class_name__() const // è·å–çª—å£ç±»å
+	{
+		return operator[](__class_name__);
+	}
+	void property__register_classes__(int whether) // æ˜¯å¦è¦æ³¨å†Œçª—å£ç±»
+	{
+		property_int64(__register_classes__, static_cast<__int64>(!!whether));
+	}
+	int property__register_classes__() const // è·çŸ¥æ˜¯å¦è¦æ³¨å†Œçª—å£ç±»
+	{
+		return property_int64(__register_classes__) == 1ll;
+	}
+	void property__hInstance__(HINSTANCE hInstance) // è®¾ç½® hInstance
+	{
+		property_int64(__hInstance__, reinterpret_cast<__int64>(hInstance));
+	}
+	HINSTANCE property__hInstance__() const // è·å– hInstance
+	{
+		return reinterpret_cast<HINSTANCE>(property_int64(__hInstance__));
+	}
+	void property__class_style__(UINT style) // è®¾ç½® class_style
+	{
+		property_int64(__class_style__, static_cast<__int64>(style));
+	}
+	UINT property__class_style__() const // è·å– class_style
+	{
+		return static_cast<UINT>(property_int64(__class_style__));
+	}
+	void property__hIcon__(HICON hIcon) // è®¾ç½® hIcon
+	{
+		property_int64(__hIcon__, reinterpret_cast<__int64>(hIcon));
+	}
+	HICON property__hIcon__() const // è·å– hIcon
+	{
+		return reinterpret_cast<HICON>(property_int64(__hIcon__));
+	}
+	void property__hIconSm__(HICON hIcon) // è®¾ç½® hIconSm
+	{
+		property_int64(__hIconSm__, reinterpret_cast<__int64>(hIcon));
+	}
+	HICON property__hIconSm__() const // è·å– hIconSm
+	{
+		return reinterpret_cast<HICON>(property_int64(__hIconSm__));
+	}
+private:
+	// åˆå§‹åŒ–
+	void __InitPropertyDict()
+	{
+		property__class_name__(__GetIdentity().second);
+		property__register_classes__(1);
+
+		property__class_style__(CS_HREDRAW | CS_VREDRAW);
+		property__hIcon__(nullptr);
+		property__hIconSm__(nullptr);
+	}
+
+	// ç±»æ ‡è¯†ï¼ˆä½¿ç”¨è™šå‡½æ•°è¡¨ï¼‰
+private:
+	// è¿”å›ç±»æ ‡è¯†ã€‚first æ˜¯è™šå‡½æ•°è¡¨æŒ‡é’ˆï¼Œsecond æ˜¯æ¨èçš„é»˜è®¤çª—å£ç±»å
+	std::pair<PVOID, std::wstring> __GetIdentity() const
+	{
+		auto vptr = *((PVOID*)this); // å– this æŒ‡å‘çš„å†…å®¹çš„å‰ 8 ä¸ªå­—èŠ‚ï¼Œå³è™šå‡½æ•°è¡¨çš„æŒ‡é’ˆ
 		WCHAR strIdName[256];
 		swprintf(strIdName, 256, L"TWindow::0x%p", vptr);
 		return std::make_pair(vptr, std::wstring(strIdName));
 	}
-	// Íâ²¿´°¿ÚÀà
-private:
-	std::wstring __strClassName;
-	VOID __SetClassName(const std::wstring& name) { __strClassName = name; }
-	// ¸Ã·½·¨ÓÉÓÃ»§ÊµÏÖ
-	virtual std::wstring _ReturnClassName() = 0;
-	// Èç¹û×¢²áÁË´°¿ÚÀà£¬Ôò½« isRegistered ÉèÎª TRUE¡£Ó¦Ê¼ÖÕ·µ»Ø TRUE
-	virtual BOOL _RegisterClasses(const std::wstring& strClassName, BOOL& isRegistered) = 0;
-public:
-	VOID RegisterClasses()
-	{
-		auto cls = _ReturnClassName();
-		if (cls.empty())
-			cls = __GetIdentity().second;
-		__SetClassName(cls);
 
-		static std::unordered_set<std::wstring> set;
-		if (!set.count(cls))
+
+	// åˆ›å»ºçª—å£ç±»
+private:
+	// åœ¨åˆ›å»ºæ—¶ä¼šå°è¯•è‡ªåŠ¨æ³¨å†Œ
+	void __RegisterClasses(HINSTANCE hInstance)
+	{
+		if (property__register_classes__())
 		{
-			BOOL isRegistered = false;
-			if (!_RegisterClasses(cls, isRegistered))
-				throw std::runtime_error("fail to register window class.");
-			if (isRegistered)
-				set.insert(GetClsName());
+			if (property__class_name__().empty())
+				throw std::runtime_error("property__class_name__ cannot be empty.");
+
+			static std::set<std::wstring> registered; // å·²æ³¨å†Œçš„ç±»å
+			if (registered.count(property__class_name__()))
+				return;
+			registered.insert(property__class_name__());
+
+			WNDCLASSEXW wndclassex = { sizeof(WNDCLASSEXW) };
+			wndclassex.style = property__class_style__();
+			wndclassex.lpfnWndProc = VirtualWindowProc;
+			wndclassex.cbClsExtra = 0;
+			wndclassex.cbWndExtra = 0;
+			wndclassex.hInstance = hInstance;
+			wndclassex.hIcon = property__hIcon__();
+			wndclassex.hIconSm = property__hIconSm__();
+			wndclassex.hCursor = LoadCursor(NULL, IDC_ARROW);
+			wndclassex.hbrBackground = GetSysColorBrush(COLOR_WINDOW);
+			wndclassex.lpszMenuName = NULL;
+			wndclassex.lpszClassName = property__class_name__().c_str();
+			if (!RegisterClassExW(&wndclassex))
+				throw std::runtime_error("Fail to RegisterClassExW.");
 		}
 	}
-public:
-	const std::wstring& GetClsName() { return __strClassName; }
 
-	// ¶ÔÍâµÄ´´½¨´°¿Ú
+
+	// å›è°ƒå‡½æ•°
 private:
-	virtual INT_PTR _Create() = 0;
-public:
-	INT_PTR Create()
+	static LRESULT CALLBACK VirtualWindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
-		RegisterClasses();
-		if (GetHwnd())
-			throw std::runtime_error("the window still exists.");
-		return _Create();
-	}
-};
+		TWindow* p = reinterpret_cast<TWindow*>(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
 
-// ´°¿Ú»ùÀà£¬ËùÓĞ´°¿Ú¶¼Ó¦ÊÇ TWindow
-class TWindow : public __TWindowBase
-{
-	// ¼üÅÌ¼ÓËÙ¼ü
+		if (message == WM_NCCREATE)
+		{
+			p = reinterpret_cast<TWindow*>(((LPCREATESTRUCT)lParam)->lpCreateParams);
+			SetWindowLongPtrW(hwnd, GWLP_USERDATA, (LONG_PTR)p);
+			p->__hwnd = hwnd;
+		}
+
+		LRESULT ret;
+		if (p)
+			ret = p->Proc(hwnd, message, wParam, lParam);
+		else
+			ret = DefWindowProcW(hwnd, message, wParam, lParam);
+
+		if (p && message == WM_DESTROY)
+			p->__hwnd = nullptr;
+
+		return ret;
+	}
+	static INT_PTR CALLBACK VirtualDialogProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+	{
+		TWindow* p = reinterpret_cast<TWindow*>(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
+
+		if (message == WM_INITDIALOG)
+		{
+			p = reinterpret_cast<TWindow*>(lParam);
+			SetWindowLongPtrW(hwnd, GWLP_USERDATA, (LONG_PTR)p);
+			p->__hwnd = hwnd;
+		}
+
+		INT_PTR ret{};
+		if (p)
+			ret = p->Proc(hwnd, message, wParam, lParam);
+
+		if (p && message == WM_DESTROY)
+			p->__hwnd = nullptr;
+
+		return ret;
+	}
+public:
+	virtual LONG_PTR Proc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) = 0;
+
+
+	// é”®ç›˜åŠ é€Ÿé”®
 private:
 	HACCEL __hAccel = NULL;
 public:
 	VOID SetCurrentAccelerator(HACCEL handle) { __hAccel = handle; }
-	VOID RevokeCurrentAccelerator() { __hAccel = NULL; }
 
-	// ÏûÏ¢Ñ­»·
+
+	// æ¶ˆæ¯å¾ªç¯
 public:
-	int MsgLoop()
+	int MessageLoop()
 	{
 		MSG msg;
 		while (GetMessageW(&msg, NULL, 0, 0))
@@ -113,526 +248,202 @@ public:
 		return (int)msg.wParam;
 	}
 
-	// ×Ô¶¨ÒåÏûÏ¢
-public:
 
-#pragma push_macro("DefineTMessage")
-#define DefineTMessage(name) const UINT name = TMessage::Register(L#name)
-	DefineTMessage(WM_NOTIFY_HOST_DESTROY); // WPARAM: this; LPARAM: null
-	DefineTMessage(WM_NOTIFY_HOST_CREATE); // WPARAM: this, LPARAM: null
-#undef DefineTMessage
-#pragma pop_macro("DefineTMessage")
-
-	// Ô¤´°¿Ú¹ı³Ì
+	// åˆ›å»ºçª—å£
 private:
-	int __iWidth = NULL;
-	int __iHeight = NULL;
+	virtual INT_PTR __Create(HINSTANCE hInstance, HWND hwndParent) = 0;
+public:
+	INT_PTR Create(HINSTANCE hInstance, HWND hwndParent)
+	{
+		property__hInstance__(hInstance);
+		__RegisterClasses(hInstance);
+		INT_PTR ret = __Create(hInstance, hwndParent);
+		return ret;
+	}
+
+
+	// Constructor
+public:
+	TWindow()
+	{
+		__InitPropertyDict();
+	}
+
+	friend class TWindowNormal;
+	friend class TWindowDialogBox;
+};
+
+class TWindowNormal : public TWindow
+{
+	// å›è°ƒå‡½æ•°
+	virtual LONG_PTR Proc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) override
+	{
+		return static_cast<LONG_PTR>(WndProc(hwnd, message, wParam, lParam));
+	}
+	virtual LRESULT WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) = 0;
+
+
+	// Constructor
+public:
+	TWindowNormal()
+	{
+		__InitPropertyDict();
+	}
+
+
+	// åˆ›å»ºçª—å£
+public:
+	virtual INT_PTR __Create(HINSTANCE hInstance, HWND hwndParent) override
+	{
+		CreateWindowExW(property__dwExStyle__(),
+			property__class_name__().c_str(),
+			property__lpWindowName__().c_str(),
+			property__dwStyle__(),
+			property__X__(),
+			property__Y__(),
+			property__nWidth__(),
+			property__nHeight__(),
+			hwndParent,
+			property__hMenu__(),
+			hInstance,
+			this);
+		return reinterpret_cast<INT_PTR>(GetHwnd());
+	}
+
+
+	// property åŠ©æ‰‹å‡½æ•°
 protected:
-	VOID _PreProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
-	{
-		switch (message)
-		{
-		case WM_CREATE:
-		case WM_INITDIALOG:
-		{
-#if TKERNEL_WINVER >= 1607
-			__dpi = GetDpiForWindow(hwnd);
-#endif
-
-			PostMessageW(GetHost(), WM_NOTIFY_HOST_CREATE, (WPARAM)this, 0);
-
-			RECT rect;
-			GetClientRect(hwnd, &rect);
-			__iWidth = rect.right - rect.left;
-			__iHeight = rect.bottom - rect.top;
-			break;
-		}
-		case WM_SIZE:
-			HANDLE_WM_SIZE(hwnd, wParam, lParam,
-				[this](HWND hwnd, UINT state, int cx, int cy)
-				{
-					__iWidth = cx;
-					__iHeight = cy;
-				});
-			break;
-		case WM_NCCREATE:
-		{
-#if TKERNEL_WINVER >= 1607
-			EnableNonClientDpiScaling(hwnd);
-#endif
-			break;
-		}
-		case WM_DPICHANGED:
-			__OnDPIChanged(wParam, lParam);
-			break;
-		default:
-			break;
-		}
-	}
-	VOID _PostProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
-	{
-		switch (message)
-		{
-		case WM_DESTROY:
-		{
-			PostMessageW(GetHost(), WM_NOTIFY_HOST_DESTROY, (WPARAM)this, 0);
-			break;
-		}
-		default:
-			break;
-		}
-	}
+	std::wstring __dwExStyle__{ L"__dwExStyle__" };	// dwExStyle
+	std::wstring __lpWindowName__{ L"__lpWindowName__" }; // lpWindowName
+	std::wstring __dwStyle__{ L"__dwStyle__" };	// dwStyle
+	std::wstring __X__{ L"__X__" }; // X
+	std::wstring __Y__{ L"__Y__" }; // Y
+	std::wstring __nWidth__{ L"__nWidth__" }; // nWidth
+	std::wstring __nHeight__{ L"__nHeight__" }; // nHeight
+	std::wstring __hMenu__{ L"__hMenu__" }; // hMenu
 public:
-	const int& iWidth = __iWidth;
-	const int& iHeight = __iHeight;
-
-	// Host Ö§³Ö
+	void property__dwExStyle__(DWORD dwExStyle) // è®¾ç½® dwExStyle å‚æ•°
+	{
+		property_int64(__dwExStyle__, static_cast<_int64>(dwExStyle));
+	}
+	DWORD property__dwExStyle__() const // è·å– dwExStyle å‚æ•°
+	{
+		return static_cast<DWORD>(property_int64(__dwExStyle__));
+	}
+	void property__lpWindowName__(const std::wstring& name) // è®¾ç½® lpWindowName å‚æ•°
+	{
+		operator[](__lpWindowName__) = name;
+	}
+	const std::wstring& property__lpWindowName__() const // è·å– lpWindowName å‚æ•°
+	{
+		return operator[](__lpWindowName__);
+	}
+	void property__dwStyle__(DWORD dwStyle) // è®¾ç½® dwStyle å‚æ•°
+	{
+		property_int64(__dwStyle__, static_cast<_int64>(dwStyle));
+	}
+	DWORD property__dwStyle__() const // è·å– dwStyle å‚æ•°
+	{
+		return static_cast<DWORD>(property_int64(__dwStyle__));
+	}
+	void property__X__(int X) // è®¾ç½® X å‚æ•°
+	{
+		property_int64(__X__, static_cast<_int64>(X));
+	}
+	int property__X__() const // è·å– X å‚æ•°
+	{
+		return static_cast<int>(property_int64(__X__));
+	}
+	void property__Y__(int Y) // è®¾ç½® Y å‚æ•°
+	{
+		property_int64(__Y__, static_cast<_int64>(Y));
+	}
+	int property__Y__() const // è·å– Y å‚æ•°
+	{
+		return static_cast<int>(property_int64(__Y__));
+	}
+	void property__nWidth__(int nWidth) // è®¾ç½® nWidth å‚æ•°
+	{
+		property_int64(__nWidth__, static_cast<_int64>(nWidth));
+	}
+	int property__nWidth__() const // è·å– nWidth å‚æ•°
+	{
+		return static_cast<int>(property_int64(__nWidth__));
+	}
+	void property__nHeight__(int nHeight) // è®¾ç½® nHeight å‚æ•°
+	{
+		property_int64(__nHeight__, static_cast<_int64>(nHeight));
+	}
+	int property__nHeight__() const // è·å– nHeight å‚æ•°
+	{
+		return static_cast<int>(property_int64(__nHeight__));
+	}
+	void property__hMenu__(HMENU hMenu) // è®¾ç½® hMenu å‚æ•°
+	{
+		property_int64(__hMenu__, reinterpret_cast<_int64>(hMenu));
+	}
+	HMENU property__hMenu__() const // è·å– hMenu å‚æ•°
+	{
+		return reinterpret_cast<HMENU>(property_int64(__hMenu__));
+	}
 private:
-	HWND __hwndHost = NULL;
-public:
-	VOID SetHost(HWND host) { __hwndHost = host; }
-	HWND GetHost() const { return __hwndHost; }
-
-	// ÖÃ´°¿Úµ½ÖĞĞÄ
-public:
-	VOID CenterizeWindow()
+	void __InitPropertyDict()
 	{
-		int cxS = GetSystemMetrics(SM_CXSCREEN);
-		int cyS = GetSystemMetrics(SM_CYSCREEN);
-		MoveWindow(GetHwnd(), (cxS - iWidth) >> 1, (cyS - iHeight) >> 1, iWidth, iHeight, TRUE);
-	}
-
-	// Ã¿¸ö´°¿Ú DPI Ö§³Ö
-private:
-	int __dpi = USER_DEFAULT_SCREEN_DPI;
-	VOID __OnDPIChanged(WPARAM wParam, LPARAM lParam)
-	{
-		EnumChildWindows(GetHwnd(), [](HWND hwnd, LPARAM wParam)->BOOL
-			{
-				SendMessageW(hwnd, WM_DPICHANGED, wParam, NULL);
-				return TRUE;
-			}, wParam);
-
-		__dpi = LOWORD(wParam);
-		if (lParam)
-		{
-			RECT* const prcNewWindow = (RECT*)lParam;
-			SetWindowPos(GetHwnd(),
-				NULL,
-				prcNewWindow->left,
-				prcNewWindow->top,
-				prcNewWindow->right - prcNewWindow->left,
-				prcNewWindow->bottom - prcNewWindow->top,
-				SWP_NOZORDER | SWP_NOACTIVATE);
-		}
-	}
-public:
-	template <typename T>
-	T dpi(const T& val)
-	{
-#if TKERNEL_WINVER >= 1609
-		double factor = (double)__dpi / USER_DEFAULT_SCREEN_DPI;
-#else
-		double factor = (double)TDPI::dpi() / USER_DEFAULT_SCREEN_DPI;
-#endif
-		return (T)(val * factor);
+		property__dwExStyle__(0);
+		property__lpWindowName__(L"");
+		property__dwStyle__(WS_OVERLAPPEDWINDOW);
+		property__X__(CW_USEDEFAULT);
+		property__Y__(CW_USEDEFAULT);
+		property__nWidth__(CW_USEDEFAULT);
+		property__nHeight__(CW_USEDEFAULT);
+		property__hMenu__(nullptr);
 	}
 };
 
-class TWindowHost : public TWindow
+class TWindowDialogBox : public TWindow
 {
-	virtual std::wstring _ReturnClassName() override
+	// å›è°ƒå‡½æ•°
+	virtual LONG_PTR Proc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) override
 	{
-		return std::wstring();
+		return static_cast<LONG_PTR>(WndProc(hwnd, message, wParam, lParam));
 	}
-	virtual BOOL _RegisterClasses(const std::wstring& strClassName, BOOL& isRegistered) override
-	{
-		WNDCLASSEXW wndclassex = { sizeof(WNDCLASSEXW) };
-		wndclassex.style = CS_HREDRAW | CS_VREDRAW;
-		wndclassex.lpfnWndProc = VirtualProc;
-		wndclassex.cbClsExtra = 0;
-		wndclassex.cbWndExtra = 0;
-		wndclassex.hInstance = HINST;
-		wndclassex.hIcon = NULL;
-		wndclassex.hIconSm = NULL;
-		wndclassex.hCursor = LoadCursor(NULL, IDC_ARROW);
-		wndclassex.hbrBackground = GetSysColorBrush(COLOR_WINDOW);
-		wndclassex.lpszMenuName = NULL;
-		wndclassex.lpszClassName = strClassName.c_str();
-		return isRegistered = RegisterClassExW(&wndclassex);
-	}
-	virtual INT_PTR _Create() override
-	{
-		CreateWindowExW(0,
-			GetClsName().c_str(), param.strWindowName.c_str(),
-			WS_OVERLAPPED,
-			0, 0, 0, 0,
-			NULL, NULL, HINST, this);
-		return 0;
-	}
+	virtual INT_PTR WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) = 0;
 
-	static LRESULT CALLBACK VirtualProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
-	{
-		TWindowHost* p = (TWindowHost*)GetWindowLongPtrW(hwnd, GWLP_USERDATA);
 
-		if (message == WM_NCCREATE)
-		{
-			p = (TWindowHost*)(((LPCREATESTRUCT)lParam)->lpCreateParams);
-			SetWindowLongPtrW(hwnd, GWLP_USERDATA, (LONG_PTR)p);
-			p->_SetHwnd(hwnd);
-		}
-
-		if (p) p->_PreProc(hwnd, message, wParam, lParam);
-		if (p) p->__PreProc(hwnd, message, wParam, lParam);
-
-		LRESULT ret;
-		if (p)
-			ret = p->WndProc(hwnd, message, wParam, lParam);
-		else
-			ret = DefWindowProcW(hwnd, message, wParam, lParam);
-
-		if (p) p->_PostProc(hwnd, message, wParam, lParam);
-
-		if (p && message == WM_DESTROY)
-			p->_SetHwnd(0);
-
-		return ret;
-	}
-	VOID __PreProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
-	{
-		switch (message)
-		{
-		default:
-		{
-			if (false) {}
-			else if (message == WM_NOTIFY_HOST_CREATE)
-			{
-				nAliveSubwindow++;
-			}
-			else if (message == WM_NOTIFY_HOST_DESTROY)
-			{
-				nAliveSubwindow--;
-				if (container.at((TWindow*)wParam).bAutoErase)
-				{
-					container.erase((TWindow*)wParam);
-					delete (TWindow*)wParam;
-				}
-
-				if (bAutoDestroySelf && !nAliveSubwindow)
-					PostMessageW(GetHwnd(), WM_CLOSE, 0, 0);
-			}
-			break;
-		}
-		}
-	}
-
-private:
-	virtual LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) = 0; // ±ØĞë¼ÓÉÏ CALLBACK ±ê¼Ç
-
-private:
-	struct CreateParam
-	{
-		std::wstring strWindowName;
-	} param;
+	// Constructor
 public:
-	CreateParam& AccessParam() { return param; }
+	TWindowDialogBox()
+	{
+		__InitPropertyDict();
+	}
 
+
+	// åˆ›å»ºçª—å£
+public:
+	virtual INT_PTR __Create(HINSTANCE hInstance, HWND hwndParent) override
+	{
+		return DialogBoxParamW(hInstance, property__TemplateName__(), hwndParent, VirtualDialogProc, reinterpret_cast<LPARAM>(this));
+	}
+
+
+	// property åŠ©æ‰‹å‡½æ•°
 protected:
-	struct SubwindowExtraInfo
-	{
-		BOOL bAutoErase = TRUE;
-	};
-	std::unordered_map<TWindow*, SubwindowExtraInfo> container;
+	std::wstring __lpTemplateName__{ L"__lpTemplateName__" };	// lpTemplateName
 public:
-	template<typename TWindow_Type>
-	TWindow_Type* Push(TWindow_Type* newWindow, BOOL bAutoErase = TRUE)
+	void property__TemplateName__(LPCWSTR lpTemplateName) // è®¾ç½® lpTemplateName å‚æ•°
 	{
-		if (!GetHwnd())
-			throw std::runtime_error("only after you create the host can you (Push).");
-		if (newWindow->GetHwnd())
-			throw std::runtime_error("only before you create the window can you (Push).");
-		if (container.count(newWindow))
-			throw std::runtime_error("you can't (Push) the same window twice.");
-
-		newWindow->SetHost(GetHwnd());
-		auto& info = container[newWindow];
-		info.bAutoErase = bAutoErase;
-		return newWindow;
+		property_int64(__lpTemplateName__, reinterpret_cast<_int64>(lpTemplateName));
 	}
-
-private:
-	int nAliveSubwindow = 0;
-public:
-	BOOL bAutoDestroySelf = TRUE;
-
-public:
-	UINT WM_ACTIVATEHOST = TMessage::Register(L"WM_ACTIVATEHOST");
-	VOID ActivateHost()
+	LPCWSTR property__TemplateName__() // è·å– lpTemplateName å‚æ•°
 	{
-		RegisterClasses();
-		HWND hwnd = FindWindowW(GetClsName().c_str(), nullptr);
-		PostMessageW(hwnd, WM_ACTIVATEHOST, NULL, NULL);
+		return reinterpret_cast<LPCWSTR>(property_int64(__lpTemplateName__));
+	}
+private:
+	void __InitPropertyDict()
+	{
+		property__register_classes__(false);
+		property__class_name__(L"#32770");
 	}
 };
 
-class TWindowPopup : public TWindow
-{
-	virtual std::wstring _ReturnClassName() override
-	{
-		return std::wstring();
-	}
-	virtual BOOL _RegisterClasses(const std::wstring& strClassName, BOOL& isRegistered) override
-	{
-		WNDCLASSEXW wndclassex = { sizeof(WNDCLASSEXW) };
-		wndclassex.style = CS_HREDRAW | CS_VREDRAW;
-		wndclassex.lpfnWndProc = VirtualProc;
-		wndclassex.cbClsExtra = 0;
-		wndclassex.cbWndExtra = 0;
-		wndclassex.hInstance = HINST;
-		wndclassex.hIcon = NULL;
-		wndclassex.hIconSm = NULL;
-		wndclassex.hCursor = LoadCursor(NULL, IDC_ARROW);
-		wndclassex.hbrBackground = GetSysColorBrush(COLOR_WINDOW);
-		wndclassex.lpszMenuName = NULL;
-		wndclassex.lpszClassName = strClassName.c_str();
-		return isRegistered = RegisterClassExW(&wndclassex);
-	}
-	virtual INT_PTR _Create() override
-	{
-		CreateWindowExW(param.dwExStyle,
-			GetClsName().c_str(), param.strWindowName.c_str(),
-			param.dwStyle,
-			param.x, param.y, param.nWidth, param.nHeight,
-			param.hWndParent, param.hMenu, HINST, this);
-		return 0;
-	}
-
-	static LRESULT CALLBACK VirtualProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
-	{
-		TWindowPopup* p = (TWindowPopup*)GetWindowLongPtrW(hwnd, GWLP_USERDATA);
-
-		if (message == WM_NCCREATE)
-		{
-			p = (TWindowPopup*)(((LPCREATESTRUCT)lParam)->lpCreateParams);
-			SetWindowLongPtrW(hwnd, GWLP_USERDATA, (LONG_PTR)p);
-			p->_SetHwnd(hwnd);
-		}
-
-		if (p) p->_PreProc(hwnd, message, wParam, lParam);
-
-		LRESULT ret;
-		if (p)
-			ret = p->WndProc(hwnd, message, wParam, lParam);
-		else
-			ret = DefWindowProcW(hwnd, message, wParam, lParam);
-
-		if (p) p->_PostProc(hwnd, message, wParam, lParam);
-
-		if (p && message == WM_DESTROY)
-			p->_SetHwnd(0);
-
-		return ret;
-	}
-
-private:
-	virtual LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) = 0; // ±ØĞë¼ÓÉÏ CALLBACK ±ê¼Ç
-
-private:
-	struct CreateParam
-	{
-		std::wstring strWindowName;
-		DWORD dwStyle = WS_POPUPWINDOW;
-		DWORD dwExStyle = 0;
-		int x = CW_USEDEFAULT;
-		int y = CW_USEDEFAULT;
-		int nWidth = 380;
-		int nHeight = 250;
-		HWND hWndParent = NULL;
-		HMENU hMenu = NULL;
-	} param;
-public:
-	CreateParam& AccessParam() { return param; }
-};
-
-class TWindowChild : public TWindow
-{
-	virtual std::wstring _ReturnClassName() override
-	{
-		return std::wstring();
-	}
-	virtual BOOL _RegisterClasses(const std::wstring& strClassName, BOOL& isRegistered) override
-	{
-		WNDCLASSEXW wndclassex = { sizeof(WNDCLASSEXW) };
-		wndclassex.style = CS_HREDRAW | CS_VREDRAW;
-		wndclassex.lpfnWndProc = VirtualProc;
-		wndclassex.cbClsExtra = 0;
-		wndclassex.cbWndExtra = 0;
-		wndclassex.hInstance = HINST;
-		wndclassex.hIcon = NULL;
-		wndclassex.hIconSm = NULL;
-		wndclassex.hCursor = LoadCursor(NULL, IDC_ARROW);
-		wndclassex.hbrBackground = GetSysColorBrush(COLOR_WINDOW);
-		wndclassex.lpszMenuName = NULL;
-		wndclassex.lpszClassName = strClassName.c_str();
-		return isRegistered = RegisterClassExW(&wndclassex);
-	}
-	virtual INT_PTR _Create() override
-	{
-		CreateWindowExW(param.dwExStyle,
-			GetClsName().c_str(), param.strWindowName.c_str(),
-			param.dwStyle,
-			param.x, param.y, param.nWidth, param.nHeight,
-			param.hWndParent, param.hMenu, HINST, this);
-		return 0;
-	}
-
-	static LRESULT CALLBACK VirtualProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
-	{
-		TWindowChild* p = (TWindowChild*)GetWindowLongPtrW(hwnd, GWLP_USERDATA);
-
-		if (message == WM_CREATE)
-		{
-			p = (TWindowChild*)(((LPCREATESTRUCT)lParam)->lpCreateParams);
-			SetWindowLongPtrW(hwnd, GWLP_USERDATA, (LONG_PTR)p);
-			p->_SetHwnd(hwnd);
-		}
-
-		p->_PreProc(hwnd, message, wParam, lParam);
-
-		LRESULT ret;
-		if (p)
-			ret = p->WndProc(hwnd, message, wParam, lParam);
-		else
-			ret = DefWindowProcW(hwnd, message, wParam, lParam);
-
-		if (p && message == WM_DESTROY)
-			p->_SetHwnd(0);
-
-		return ret;
-	}
-
-private:
-	virtual LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) = 0; // ±ØĞë¼ÓÉÏ CALLBACK ±ê¼Ç
-
-private:
-	struct CreateParam
-	{
-		std::wstring strWindowName;
-		DWORD dwStyle = WS_CHILDWINDOW | WS_VISIBLE;
-		DWORD dwExStyle = 0;
-		int x = 0;
-		int y = 0;
-		int nWidth = 0;
-		int nHeight = 0;
-		HWND hWndParent = NULL;
-		HMENU hMenu = NULL;
-	} param;
-public:
-	CreateParam& AccessParam() { return param; }
-};
-
-class TDialogBox : public TWindow
-{
-	virtual std::wstring _ReturnClassName() override
-	{
-		return std::wstring(L"#32770");
-	}
-	virtual BOOL _RegisterClasses(const std::wstring& strClassName, BOOL& isRegistered) override
-	{
-		return TRUE;
-	}
-	virtual INT_PTR _Create() override
-	{
-		return DialogBoxParamW(HINST, param.lpTemplateName, param.hWndParent, VirtualProc, (LPARAM)this);
-	}
-
-	static INT_PTR CALLBACK VirtualProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
-	{
-		TDialogBox* p = (TDialogBox*)GetWindowLongPtrW(hwnd, GWLP_USERDATA);
-
-		if (message == WM_INITDIALOG)
-		{
-			p = (TDialogBox*)(lParam);
-			SetWindowLongPtrW(hwnd, GWLP_USERDATA, (LONG_PTR)p);
-			p->_SetHwnd(hwnd);
-		}
-
-		if (p) p->_PreProc(hwnd, message, wParam, lParam);
-
-		LRESULT ret = FALSE;
-		if (p)
-			ret = p->WndProc(hwnd, message, wParam, lParam);
-
-		if (p) p->_PostProc(hwnd, message, wParam, lParam);
-
-		if (p && message == WM_DESTROY)
-			p->_SetHwnd(0);
-
-		return ret;
-	}
-
-private:
-	virtual INT_PTR CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) = 0; // ±ØĞë¼ÓÉÏ CALLBACK ±ê¼Ç
-
-private:
-	struct CreateParam
-	{
-		LPCWSTR lpTemplateName = nullptr;
-		HWND hWndParent = NULL;
-	} param;
-public:
-	CreateParam& AccessParam() { return param; }
-};
-
-class TCreateDialog : public TWindow
-{
-	virtual std::wstring _ReturnClassName() override
-	{
-		return std::wstring(L"#32770");
-	}
-	virtual BOOL _RegisterClasses(const std::wstring& strClassName, BOOL& isRegistered) override
-	{
-		return TRUE;
-	}
-	virtual INT_PTR _Create() override
-	{
-		return (INT_PTR)CreateDialogParamW(HINST, param.lpTemplateName, param.hWndParent, VirtualProc, (LPARAM)this);
-	}
-
-	static INT_PTR CALLBACK VirtualProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
-	{
-		TCreateDialog* p = (TCreateDialog*)GetWindowLongPtrW(hwnd, GWLP_USERDATA);
-
-		if (message == WM_INITDIALOG)
-		{
-			p = (TCreateDialog*)(lParam);
-			SetWindowLongPtrW(hwnd, GWLP_USERDATA, (LONG_PTR)p);
-			p->_SetHwnd(hwnd);
-		}
-
-		if (p) p->_PreProc(hwnd, message, wParam, lParam);
-
-		LRESULT ret = FALSE;
-		if (p)
-			ret = p->WndProc(hwnd, message, wParam, lParam);
-
-		if (p) p->_PostProc(hwnd, message, wParam, lParam);
-
-		if (p && message == WM_DESTROY)
-			p->_SetHwnd(0);
-
-		return ret;
-	}
-
-private:
-	virtual INT_PTR CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) = 0; // ±ØĞë¼ÓÉÏ CALLBACK ±ê¼Ç
-
-private:
-	struct CreateParam
-	{
-		LPCWSTR lpTemplateName = nullptr;
-		HWND hWndParent = NULL;
-	} param;
-public:
-	CreateParam& AccessParam() { return param; }
-};
+#endif // TKERNEL_WINVER > 0

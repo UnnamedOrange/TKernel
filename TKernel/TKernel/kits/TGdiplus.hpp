@@ -18,49 +18,40 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-// TGdiplus
-
 #pragma once
+
+#if TKERNEL_WINVER > 0 && TKERNEL_GDIPVER > 0
+
 #include "TStdInclude.hpp"
 
 class TGdiplus final
 {
-	static ULONG_PTR& GetGdiplusToken()
+	ULONG_PTR gdiplusToken{};
+	BOOL isLoaded{};
+	VOID Startup()
 	{
-		static ULONG_PTR GdiplusToken = 0;
-		return GdiplusToken;
-	}
-	static int& GetRefCount()
-	{
-		static int RefCount = 0;
-		return RefCount;
-	}
-	static VOID Load()
-	{
+		if (isLoaded) return;
 		Gdiplus::GdiplusStartupInput gdiplusStartupInput;
-		Gdiplus::GdiplusStartup(&GetGdiplusToken(), &gdiplusStartupInput, nullptr);
+		Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, nullptr);
+		isLoaded = TRUE;
 	}
-	static VOID Unload()
+	TGdiplus() = default;
+
+public:
+	~TGdiplus()
 	{
-		auto& token = GetGdiplusToken();
-		if (token)
+		if (gdiplusToken)
 		{
-			Gdiplus::GdiplusShutdown(token);
-			token = 0;
+			Gdiplus::GdiplusShutdown(gdiplusToken);
+			gdiplusToken = NULL;
 		}
 	}
 
-public:
-	TGdiplus()
+	static VOID EnableGdiplus()
 	{
-		if (!GetRefCount())
-			Load();
-		GetRefCount()++;
-	}
-	~TGdiplus()
-	{
-		GetRefCount()--;
-		if (!GetRefCount())
-			Unload();
+		static TGdiplus instance;
+		instance.Startup();
 	}
 };
+
+#endif // TKERNEL_GDIPVER > 0

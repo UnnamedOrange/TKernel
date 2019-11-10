@@ -18,30 +18,29 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-// TKernel
-
-// Alpha 6
-
 #pragma once
-
-#ifndef TKERNEL
-#define TKERNEL
 
 #ifndef TKERNEL_WINVER
 #define TKERNEL_WINVER 1903
-#endif
+#endif // 对于 Windows 10，请按年份-月份指定版本；对于 Windows 10 以前版本，请使用 7、8；对于不依赖 Windows 的程序，请使用 0
 
-#include "TStdInclude.hpp"
-#include "TApplication.hpp"
-#include "TFileInfo.hpp"
-#include "TBlock.hpp"
-#include "TWindow.hpp"
-#include "TDPI.hpp"
-#include "TGdiplus.hpp"
-#include "TPrivateFont.hpp" 
-#include "TTimer.hpp"
-#include "TMessage.hpp"
-#include "TCollection.hpp" // Alpha 4
-#include "TOpenSaveDialog.hpp" // Alpha 5
-#include "TValue.hpp" // Alpha 5
-#endif /* !TKERNEL */
+#if TKERNEL_WINVER > 0
+#ifndef TKERNEL_GDIPVER
+#define TKERNEL_GDIPVER 11
+#endif // 对于 GDIP 1.0，请使用 10；对于 GDIP 1.1，请使用 11；对于不使用 GDIP 的程序，请使用 0
+#endif // TKERNEL_WINVER
+
+#include "TStdInclude.hpp"			// Alpha 10.0
+#include "TApplication.hpp"			// Alpha 10.0
+#include "TGdiplus.hpp"				// Alpha 10.0
+#include "TWindow.hpp"				// Alpha 10.0
+
+//#include "TFileInfo.hpp"
+//#include "TWindow.hpp"
+//#include "TDPI.hpp"
+//#include "TPrivateFont.hpp" 
+//#include "TTimer.hpp"
+//#include "TMessage.hpp"
+//#include "TCollection.hpp"			// Alpha 4
+//#include "TOpenSaveDialog.hpp"		// Alpha 5
+//#include "TValue.hpp"				// Alpha 5
