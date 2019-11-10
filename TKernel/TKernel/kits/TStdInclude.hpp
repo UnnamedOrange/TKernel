@@ -18,10 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-// TStdInclude
-
-// include standard headers
-
 #pragma once
 
 // CRT
@@ -52,14 +48,10 @@
 #include <functional>
 #include <random>
 #include <stdexcept>
+#include <typeinfo>
+#include <thread>
 
-#if defined _M_IX86
-#pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='x86' publicKeyToken='6595b64144ccf1df' language='*'\"")
-#elif defined _M_X64
-#pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='amd64' publicKeyToken='6595b64144ccf1df' language='*'\"")
-#else
-#pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
-#endif
+#if TKERNEL_WINVER > 0
 
 // Windows Base
 #include <Windows.h>
@@ -76,8 +68,26 @@
 #include <Psapi.h>
 #include <dwmapi.h>
 
+// Graphics
+#if TKERNEL_GDIPVER > 0
+
+#if TKERNEL_GDIPVER == 11
+#define GDIPVER 0x0110
+#endif // TKERNEL_GDIPVER == 11
+
 #include <gdiplus.h>
+#endif // TKERNEL_WINVER > 0
+
 #include <d2d1.h>
+
+// 6.0
+#if defined _M_IX86
+#pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='x86' publicKeyToken='6595b64144ccf1df' language='*'\"")
+#elif defined _M_X64
+#pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='amd64' publicKeyToken='6595b64144ccf1df' language='*'\"")
+#else
+#pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
+#endif
 
 // link lib
 #pragma comment(lib, "winmm.lib")
@@ -93,4 +103,6 @@
 
 // HINST
 extern "C" const IMAGE_DOS_HEADER __ImageBase; // &__ImageBase
-#define HINST (HINSTANCE)(&__ImageBase)
+#define HINST HINSTANCE(&__ImageBase)
+
+#endif // TKERNEL_WINVER > 0
