@@ -34,10 +34,10 @@
 #include "TApplication.hpp"			// Alpha 10.0
 #include "TGdiplus.hpp"				// Alpha 10.0
 #include "TWindow.hpp"				// Alpha 10.0
+#include "TDPI.hpp"					// Alpha 10.0
 
 //#include "TFileInfo.hpp"
 //#include "TWindow.hpp"
-//#include "TDPI.hpp"
 //#include "TPrivateFont.hpp" 
 //#include "TTimer.hpp"
 //#include "TMessage.hpp"
