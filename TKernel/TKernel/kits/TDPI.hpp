@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2019 Orange Software
+﻿// Copyright (c) 2018-2019 Orange Software
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files(the "Software"), to deal
@@ -24,31 +24,23 @@
 
 #include "TStdInclude.hpp"
 
-class TDPI final
+class TDPI abstract // VC++ 编译器专用
 {
-	HWND __hwnd{};
-	WNDPROC __origin_proc{};
-
-	UINT __dpi{};
+	double __dpi{};
 
 public:
-	TDPI()
+	void VirtualProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
-
-	}
-
-private:
-	static auto& AccessMap()
-	{
-		static std::unordered_map<HWND, TDPI*> _;
-		return _;
-	}
-	static LRESULT CALLBACK __new_proc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
-	{
-		TDPI& t = *(AccessMap()[hwnd]);
-		if (message == WM_DPICHANGED)
+		switch (message)
 		{
-			t.__dpi = HIWORD(wParam);
+		case WM_NCCREATE:
+		{
+			__dpi = static_cast<double>(GetDpiForWindow(hwnd)) / USER_DEFAULT_SCREEN_DPI;
+			break;
+		}
+		case WM_DPICHANGED:
+		{
+			__dpi = static_cast<double>(HIWORD(wParam)) / USER_DEFAULT_SCREEN_DPI;
 
 			RECT* const prcNewWindow = (RECT*)lParam;
 			SetWindowPos(hwnd,
@@ -58,46 +50,13 @@ private:
 				prcNewWindow->right - prcNewWindow->left,
 				prcNewWindow->bottom - prcNewWindow->top,
 				SWP_NOZORDER | SWP_NOACTIVATE);
+			break;
 		}
-		return t.__origin_proc(hwnd, message, wParam, lParam);
-	}
-
-public:
-	void AttachToWindow(HWND hwnd)
-	{
-		if (__origin_proc)
-			throw std::runtime_error("This TDPI object has already attached to a window.");
-		__origin_proc = reinterpret_cast<WNDPROC>(GetWindowLongPtrW(hwnd, GWLP_WNDPROC));
-		if (!__origin_proc)
-			throw std::runtime_error("Fail to attach to the window.");
-		AccessMap()[hwnd] = this;
-		SetWindowLongPtrW(hwnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(__new_proc));
-		__hwnd = hwnd;
-
-		__dpi = GetDpiForWindow(hwnd);
-	}
-	void Detach()
-	{
-		if (__origin_proc)
-		{
-			SetWindowLongPtrW(__hwnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(__origin_proc));
-			AccessMap().erase(__hwnd);
-			__origin_proc = nullptr;
-			__hwnd = nullptr;
 		}
 	}
 
 public:
-	~TDPI()
-	{
-		Detach();
-	}
-
-public:
-	operator double()
-	{
-		return static_cast<double>(__dpi) / USER_DEFAULT_SCREEN_DPI;
-	}
+	const double& dpi{ __dpi };
 };
 
 #endif // TKERNEL_WINVER >= 1607
