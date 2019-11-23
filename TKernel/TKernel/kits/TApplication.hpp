@@ -54,11 +54,22 @@ public:
 	// Execute
 public:
 	virtual int App() = 0;
+	static PVOID& __AccessInstance()
+	{
+		static PVOID _;
+		return _;
+	}
 public:
+	static PVOID GetCurrentInstanceRaw()
+	{
+		return __AccessInstance();
+	}
 	template<typename AppType>
 	static int Execute(HINSTANCE hInstance = GetModuleHandleW(nullptr))
 	{
-		return std::make_unique<AppType>(hInstance)->App();
+		auto t = std::make_unique<AppType>(hInstance);
+		__AccessInstance() = t.get();
+		return t->App();
 	}
 
 	// CommandLine
@@ -178,8 +189,6 @@ public:
 
 		__int64* p = reinterpret_cast<__int64*>(
 			MapViewOfFile(__hMapFile, FILE_MAP_ALL_ACCESS, 0, 0, sizeof(__int64)));
-		if (GetLastError() != ERROR_ALREADY_EXISTS)
-			throw std::logic_error("The shared memory have not been written yet.");
 		if (!p)
 			throw std::runtime_error("Fail to MapViewOfFile.");
 		__int64 ret = *p;
