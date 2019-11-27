@@ -18,40 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-// TMessage
-
-// Window Message Manager, Singleton
-
 #pragma once
-#include "TStdInclude.hpp"
 
-class TMessage final
-{
-	UINT rec = 0;
-	std::unordered_map<std::wstring, UINT> reg;
-	TMessage() = default;
+#if TKERNEL_WINVER > 0
 
-	UINT __Register(const std::wstring& name)
-	{
-		try
-		{
-			return reg.at(name);
-		}
-		catch (const std::exception&)
-		{
-			return reg[name] = WM_APP + rec++;
-		}
-	}
+#include "../TStdInclude.hpp"
 
-private:
-	static TMessage& Singleton()
-	{
-		static TMessage instance;
-		return instance;
-	}
-public:
-	static UINT Register(const std::wstring& name)
-	{
-		return Singleton().__Register(name);
-	}
-};
+#include "THANDLE.hpp"
+
+#endif // TKERNEL_WINVER > 0

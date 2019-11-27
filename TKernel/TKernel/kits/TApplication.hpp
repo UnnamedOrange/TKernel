@@ -24,6 +24,8 @@
 
 #include "TStdInclude.hpp"
 
+#include "TSmartObject/TSmartObject.hpp"
+
 class TApplication
 {
 	//public:
@@ -45,36 +47,48 @@ class TApplication
 	//		return block;
 	//	}
 
-	// hInstance
+	///<summary>
+	/// hInstance
+	///</summary>
 private:
 	HINSTANCE __hInstance{};
 public:
 	const HINSTANCE& hInstance{ __hInstance };
 
-	// Execute
+	///<summary>
+	/// 当前 TApplication 实例
+	///</summary>
 public:
-	virtual int App() = 0;
-	static PVOID& __AccessInstance()
+	///<summary>
+	/// 将此函数看作应用程序入口
+	///</summary>
+	virtual int OnExecute() = 0;
+	static PVOID& __access_instance()
 	{
 		static PVOID _;
 		return _;
 	}
 public:
-	static PVOID GetCurrentInstanceRaw()
+	template <typename AppType>
+	static AppType& App()
 	{
-		return __AccessInstance();
+		return *(reinterpret_cast<AppType*>(__access_instance()));
 	}
 	template<typename AppType>
 	static int Execute(HINSTANCE hInstance = GetModuleHandleW(nullptr))
 	{
 		auto t = std::make_unique<AppType>(hInstance);
-		__AccessInstance() = t.get();
-		return t->App();
+		__access_instance() = t.get();
+		int ret = t->OnExecute();
+		__access_instance() = nullptr;
+		return ret;
 	}
 
-	// CommandLine
+	///<summary>
+	/// 命令行
+	///</summary>
 private:
-	std::vector<std::wstring> CommandLine;
+	std::vector<std::wstring> __CommandLine;
 private:
 	void __QueryCommandLine()
 	{
@@ -82,13 +96,15 @@ private:
 		int nCmd;
 		LPWSTR* lpCmdLineArray = CommandLineToArgvW(lpCmdLine, &nCmd);
 		for (int i = 0; i < nCmd; i++)
-			CommandLine.push_back(lpCmdLineArray[i]);
-		LocalFree((HLOCAL)lpCmdLineArray);
+			__CommandLine.push_back(lpCmdLineArray[i]);
+		LocalFree(reinterpret_cast<HLOCAL>(lpCmdLineArray));
 	}
 public:
-	const std::vector<std::wstring>& GetCmdLine() const { return CommandLine; }
+	const std::vector<std::wstring>& GetCmdLine() const { return __CommandLine; }
 
-	// App version info
+	///<summary>
+	/// 应用程序版本信息
+	///</summary>
 private:
 	std::tuple<int, int, int, int> VersionInfo{};
 	void __QueryAppVersionInfo()
@@ -119,12 +135,14 @@ public:
 		return VersionInfo;
 	}
 
-	// Single Instance
+	///<summary>
+	/// 应用程序单例运行
+	///</summary>
 private:
-	HANDLE __hMutex{};
-	HANDLE __hMapFile{};
+	THANDLE<> __hMutex;
+	THANDLE<> __hMapFile;
 private:
-	std::string __GetClassIdentity(unsigned int idx) const
+	std::string __get_class_identity(unsigned int idx) const
 	{
 		std::string type{ typeid(*this).name() };
 		std::default_random_engine random_engine(static_cast<unsigned int>(std::hash<std::string>()(type)) + idx);
@@ -142,21 +160,22 @@ public:
 
 		}
 	};
-	// 要求应用程序在用户级单例启动，否则抛出 TApplication::SingleInstance 异常
+	///<summary>
+	/// 要求应用程序在用户级单例启动，否则抛出 TApplication::SingleInstance 异常
+	///</summary>
 	void DemandSingleInstance()
 	{
 		if (__hMutex)
 			throw std::runtime_error("DemandSingleInstance cannot be called twice.");
 
-		__hMutex = CreateMutexA(nullptr, FALSE, __GetClassIdentity(0).c_str());
+		__hMutex = CreateMutexA(nullptr, FALSE, __get_class_identity(0).c_str());
 		if (!__hMutex)
 			throw std::runtime_error("Fail to CreateMutex.");
 
 		DWORD dwLastError = GetLastError();
 		if (dwLastError == ERROR_ALREADY_EXISTS)
 		{
-			CloseHandle(__hMutex);
-			__hMutex = nullptr;
+			__hMutex.reset();
 			throw SingleInstance();
 		}
 	}
@@ -166,32 +185,32 @@ private:
 		if (!__hMapFile)
 		{
 			__hMapFile = CreateFileMappingA(INVALID_HANDLE_VALUE, // 内存 
-				nullptr, PAGE_READWRITE, 0, sizeof(__int64), __GetClassIdentity(1).c_str());
+				nullptr, PAGE_READWRITE, 0, sizeof(__int64), __get_class_identity(1).c_str());
 			if (!__hMapFile)
 				throw std::runtime_error("Fail to CreateFileMappingA.");
 		}
 	}
 public:
-	void WriteSharedInt64(__int64 data)
+	void WriteSharedInt64(INT64 data)
 	{
 		__CreateSharedMemory();
 
-		__int64* p = reinterpret_cast<__int64*>(
-			MapViewOfFile(__hMapFile, FILE_MAP_ALL_ACCESS, 0, 0, sizeof(__int64)));
+		INT64* p = reinterpret_cast<INT64*>(
+			MapViewOfFile(__hMapFile.get(), FILE_MAP_ALL_ACCESS, 0, 0, sizeof(INT64)));
 		if (!p)
 			throw std::runtime_error("Fail to MapViewOfFile.");
 		*p = data;
 		UnmapViewOfFile(p);
 	}
-	__int64 ReadSharedInt64()
+	INT64 ReadSharedInt64()
 	{
 		__CreateSharedMemory();
 
-		__int64* p = reinterpret_cast<__int64*>(
-			MapViewOfFile(__hMapFile, FILE_MAP_ALL_ACCESS, 0, 0, sizeof(__int64)));
+		INT64* p = reinterpret_cast<__int64*>(
+			MapViewOfFile(__hMapFile.get(), FILE_MAP_ALL_ACCESS, 0, 0, sizeof(INT64)));
 		if (!p)
 			throw std::runtime_error("Fail to MapViewOfFile.");
-		__int64 ret = *p;
+		INT64 ret = *p;
 		UnmapViewOfFile(p);
 
 		return ret;

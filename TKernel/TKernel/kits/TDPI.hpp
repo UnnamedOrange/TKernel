@@ -34,6 +34,7 @@ public:
 		switch (message)
 		{
 		case WM_NCCREATE:
+		case WM_DPICHANGED_BEFOREPARENT:
 		{
 			__dpi = static_cast<double>(GetDpiForWindow(hwnd)) / USER_DEFAULT_SCREEN_DPI;
 			break;

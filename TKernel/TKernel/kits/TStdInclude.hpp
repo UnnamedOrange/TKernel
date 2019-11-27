@@ -20,7 +20,9 @@
 
 #pragma once
 
-// CRT
+///<summary>
+/// CRT
+///</summay>
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
@@ -30,7 +32,9 @@
 #include <cctype>
 #include <ctime>
 
-// STL
+///<summary>
+/// STL
+///</summay>
 #include <iostream>
 #include <algorithm>
 #include <vector>
@@ -50,15 +54,20 @@
 #include <stdexcept>
 #include <typeinfo>
 #include <thread>
+#include <optional>
 
 #if TKERNEL_WINVER > 0
 
-// Windows Base
+///<summary>
+/// Windows Base
+///</summay>
 #include <Windows.h>
 #include <windowsx.h>
 #include <tchar.h>
 
-// Extra
+///<summary>
+/// Extra
+///</summay>
 #include <tlhelp32.h>
 #include <commctrl.h>
 #include <commdlg.h>
@@ -68,7 +77,9 @@
 #include <Psapi.h>
 #include <dwmapi.h>
 
-// Graphics
+///<summary>
+/// Graphics
+///</summay>
 #if TKERNEL_GDIPVER > 0
 
 #if TKERNEL_GDIPVER == 11
@@ -80,7 +91,9 @@
 
 #include <d2d1.h>
 
-// 6.0
+///<summary>
+/// Common Control 6.0
+///</summay>
 #if defined _M_IX86
 #pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='x86' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #elif defined _M_X64
@@ -89,7 +102,9 @@
 #pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #endif
 
-// link lib
+///<summary>
+/// link lib
+///</summay>
 #pragma comment(lib, "winmm.lib")
 #pragma comment(lib, "version.lib")
 #pragma comment(lib, "Psapi.lib")
@@ -101,8 +116,10 @@
 #pragma comment(lib, "d2d1.lib")
 #pragma comment(lib, "gdiplus.lib")
 
-// HINST
-extern "C" const IMAGE_DOS_HEADER __ImageBase; // &__ImageBase
-#define HINST HINSTANCE(&__ImageBase)
+///<summary>
+/// HINST macro is abandoned.
+///</summay>
+//extern "C" const IMAGE_DOS_HEADER __ImageBase; // &__ImageBase
+//#define HINST HINSTANCE(&__ImageBase)
 
 #endif // TKERNEL_WINVER > 0

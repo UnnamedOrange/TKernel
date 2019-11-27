@@ -47,6 +47,9 @@ public:
 		}
 	}
 
+	///<summary>
+	/// 在程序开始执行时调用该函数即可启用 GDIP。TGdiplus 将自动关闭 Gdiplus。
+	///</summary>
 	static VOID EnableGdiplus()
 	{
 		static TGdiplus instance;
