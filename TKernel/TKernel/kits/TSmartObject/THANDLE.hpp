@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2019 Orange Software
+ï»¿// Copyright (c) 2018-2019 Orange Software
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files(the "Software"), to deal
@@ -50,19 +50,19 @@ public:
 	}
 
 	///<summary>
-	/// ·µ»Øµ±Ç°¾ä±úÊÇ·ñÎŞĞ§
+	/// è¿”å›å½“å‰å¥æŸ„æ˜¯å¦æ— æ•ˆ
 	///</summary>
 	bool invalid() const { return handle == invalid_value; }
 	///<summary>
-	/// ·µ»Øµ±Ç°¾ä±úÊÇ·ñÓĞĞ§
+	/// è¿”å›å½“å‰å¥æŸ„æ˜¯å¦æœ‰æ•ˆ
 	///</summary>
 	bool valid() const { return !invalid(); }
 	///<summary>
-	/// ·µ»Øµ±Ç°¾ä±úÊÇ·ñÓĞĞ§
+	/// è¿”å›å½“å‰å¥æŸ„æ˜¯å¦æœ‰æ•ˆ
 	///</summary>
 	operator bool const() { return valid(); }
 	///<summary>
-	/// Çå¿Õµ±Ç°¾ä±ú
+	/// æ¸…ç©ºå½“å‰å¥æŸ„
 	///</summary>
 	void reset()
 	{
@@ -71,7 +71,7 @@ public:
 		handle = invalid_value;
 	}
 	///<summary>
-	/// ½«µ±Ç°¾ä±úÉèÎªĞÂµÄ¾ä±ú
+	/// å°†å½“å‰å¥æŸ„è®¾ä¸ºæ–°çš„å¥æŸ„
 	///</summary>
 	void reset(HANDLE free_handle)
 	{
@@ -79,7 +79,7 @@ public:
 		handle = free_handle;
 	}
 	///<summary>
-	/// ²»ÔÙÊ¹ÓÃ¸ÃÖÇÄÜ¶ÔÏó¹ÜÀíµ±Ç°¾ä±ú
+	/// ä¸å†ä½¿ç”¨è¯¥æ™ºèƒ½å¯¹è±¡ç®¡ç†å½“å‰å¥æŸ„
 	///</summary>
 	HANDLE release()
 	{
@@ -88,7 +88,7 @@ public:
 		return ret;
 	}
 	///<summary>
-	/// ·µ»Øµ±Ç°¾ä±ú
+	/// è¿”å›å½“å‰å¥æŸ„
 	///</summary>
 	HANDLE get()
 	{

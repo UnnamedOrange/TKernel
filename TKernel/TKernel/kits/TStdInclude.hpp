@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2019 Orange Software
+﻿// Copyright (c) 2018-2019 Orange Software
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files(the "Software"), to deal
@@ -19,6 +19,9 @@
 // SOFTWARE.
 
 #pragma once
+
+#pragma warning(push)
+#pragma warning(disable:4458)
 
 ///<summary>
 /// CRT
@@ -89,6 +92,7 @@
 #endif // TKERNEL_GDIPVER == 11
 
 #include <gdiplus.h>
+
 #endif // TKERNEL_WINVER > 0
 
 #include <d2d1.h>
@@ -125,3 +129,5 @@
 //#define HINST HINSTANCE(&__ImageBase)
 
 #endif // TKERNEL_WINVER > 0
+
+#pragma warning(pop)

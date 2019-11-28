@@ -26,7 +26,7 @@
 
 #include "TWinAugBase.hpp"
 
-class TDPI : virtual public TWinAugBase
+class TDPI : virtual public TAugProcBase
 {
 	double __dpi{};
 
@@ -64,7 +64,7 @@ public:
 public:
 	TDPI()
 	{
-		append_front<TDPI>(this);
+		append_pre_proc(this);
 	}
 };
 

@@ -26,7 +26,7 @@
 
 #include "TWinAug/TWinAug.hpp"
 
-class TWindow : virtual public TWinAugBase
+class TWindow : virtual public TAugProcBase
 {
 	// 窗口句柄
 private:
@@ -137,7 +137,9 @@ private:
 
 	// 类标识（使用虚函数表）
 private:
-	// 返回类标识。first 是虚函数表指针，second 是推荐的默认窗口类名
+	///<summary>
+	/// 返回类标识。first 是虚函数表指针，second 是推荐的默认窗口类名
+	///</summary>
 	std::pair<PVOID, std::wstring> __GetIdentity() const
 	{
 		auto vptr = *((PVOID*)this); // 取 this 指向的内容的前 8 个字节，即虚函数表的指针
@@ -149,7 +151,9 @@ private:
 
 	// 创建窗口类
 private:
-	// 在创建时会尝试自动注册
+	///<summary>
+	/// 在创建时会尝试自动注册
+	///</summary>
 	void __RegisterClasses(HINSTANCE hInstance)
 	{
 		if (property__register_classes__())
@@ -196,10 +200,10 @@ private:
 		LRESULT ret;
 		if (p)
 		{
-			for (auto t : p->_front_procs)
+			for (auto t : p->__pre_procs)
 				t(hwnd, message, wParam, lParam);
 			ret = p->Proc(hwnd, message, wParam, lParam);
-			for (auto t : p->_back_procs)
+			for (auto t : p->__post_procs)
 				t(hwnd, message, wParam, lParam);
 		}
 		else
@@ -224,10 +228,10 @@ private:
 		INT_PTR ret{};
 		if (p)
 		{
-			for (auto t : p->_front_procs)
+			for (auto t : p->__pre_procs)
 				t(hwnd, message, wParam, lParam);
 			ret = p->Proc(hwnd, message, wParam, lParam);
-			for (auto t : p->_back_procs)
+			for (auto t : p->__post_procs)
 				t(hwnd, message, wParam, lParam);
 		}
 
