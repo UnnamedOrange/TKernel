@@ -139,8 +139,8 @@ public:
 	/// 应用程序单例运行
 	///</summary>
 private:
-	THANDLE<> __hMutex;
-	THANDLE<> __hMapFile;
+	THANDLE __hMutex;
+	THANDLE __hMapFile;
 private:
 	std::string __get_class_identity(unsigned int idx) const
 	{

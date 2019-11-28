@@ -24,26 +24,26 @@
 
 #include "../TStdInclude.hpp"
 
-template <HANDLE invalid_value = nullptr>
-class THANDLE final
+template <UINT_PTR invalid_value = NULL>
+class _THANDLE final
 {
 	HANDLE handle;
 
 public:
-	THANDLE() : handle(invalid_value) {}
-	THANDLE(HANDLE free_handle) : handle(free_handle) {}
-	THANDLE(const THANDLE&) = delete;
-	THANDLE(THANDLE&& another)
+	_THANDLE() : handle(invalid_value) {}
+	_THANDLE(HANDLE free_handle) : handle(free_handle) {}
+	_THANDLE(const _THANDLE&) = delete;
+	_THANDLE(_THANDLE&& another)
 	{
 		handle = another.handle;
 		another.handle = invalid_value;
 	}
-	~THANDLE()
+	~_THANDLE()
 	{
 		reset();
 	}
 
-	THANDLE& operator=(HANDLE free_handle)
+	_THANDLE& operator=(HANDLE free_handle)
 	{
 		reset(free_handle);
 		return *this;
@@ -94,8 +94,9 @@ public:
 	{
 		return handle;
 	}
-
-
 };
+
+using THANDLE = _THANDLE<>;
+using THANDLEX = _THANDLE<reinterpret_cast<UINT_PTR>(INVALID_HANDLE_VALUE)>;
 
 #endif // TKERNEL_WINVER > 0

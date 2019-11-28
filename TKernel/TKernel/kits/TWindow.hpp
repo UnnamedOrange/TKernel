@@ -24,14 +24,15 @@
 
 #include "TStdInclude.hpp"
 
-// #include "TMessage.hpp"
-
 class TWindow
 {
 	// 窗口句柄
 private:
 	HWND __hwnd;
 public:
+	///<summary>
+	/// 获取窗口句柄
+	///</summary>
 	HWND GetHwnd() const { return __hwnd; }
 
 
