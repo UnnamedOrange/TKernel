@@ -39,6 +39,13 @@ class TWinAugBase
 protected:
 	std::vector<ProcType> _front_procs;
 	std::vector<ProcType> _back_procs;
+	template<typename T>
+	void append_front(T* _this)
+	{
+		_front_procs.push_back(std::bind(&T::AugProc, _this,
+			std::placeholders::_1, std::placeholders::_2,
+			std::placeholders::_3, std::placeholders::_4));
+	}
 };
 
 #endif // TKERNEL_WINVER > 0

@@ -64,9 +64,7 @@ public:
 public:
 	TDPI()
 	{
-		_front_procs.push_back(std::bind(&TDPI::AugProc, this,
-			std::placeholders::_1, std::placeholders::_2,
-			std::placeholders::_3, std::placeholders::_4));
+		append_front<TDPI>(this);
 	}
 };
 
