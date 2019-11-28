@@ -54,7 +54,9 @@
 #include <stdexcept>
 #include <typeinfo>
 #include <thread>
+#if _HAS_CXX17
 #include <optional>
+#endif // _HAS_CXX17
 
 #if TKERNEL_WINVER > 0
 

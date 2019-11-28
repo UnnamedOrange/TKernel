@@ -22,9 +22,11 @@
 
 #if TKERNEL_WINVER > 0
 
-#include "TStdInclude.hpp"
+#include "../TStdInclude.hpp"
 
-class TWindow
+#include "TWinAug/TWinAug.hpp"
+
+class TWindow : virtual public TWinAugBase
 {
 	// 窗口句柄
 private:
@@ -193,7 +195,13 @@ private:
 
 		LRESULT ret;
 		if (p)
+		{
+			for (auto t : p->_front_procs)
+				t(hwnd, message, wParam, lParam);
 			ret = p->Proc(hwnd, message, wParam, lParam);
+			for (auto t : p->_back_procs)
+				t(hwnd, message, wParam, lParam);
+		}
 		else
 			ret = DefWindowProcW(hwnd, message, wParam, lParam);
 
@@ -215,7 +223,13 @@ private:
 
 		INT_PTR ret{};
 		if (p)
+		{
+			for (auto t : p->_front_procs)
+				t(hwnd, message, wParam, lParam);
 			ret = p->Proc(hwnd, message, wParam, lParam);
+			for (auto t : p->_back_procs)
+				t(hwnd, message, wParam, lParam);
+		}
 
 		if (p && message == WM_DESTROY)
 			p->__hwnd = nullptr;

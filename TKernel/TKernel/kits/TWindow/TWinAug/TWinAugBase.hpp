@@ -20,44 +20,25 @@
 
 #pragma once
 
-#if TKERNEL_WINVER >= 1607
+#if TKERNEL_WINVER > 0
 
-#include "TStdInclude.hpp"
+#include "../../TStdInclude.hpp"
 
-class TDPI abstract // VC++ 编译器专用
+///<summary>
+/// TWinAugBase
+/// 继承 TWindow 的同时继承 TWinAugBase，即可实现窗口增强。
+/// 编写窗口增强时，需要使用虚继承。
+///</summary>
+
+class TWinAugBase
 {
-	double __dpi{};
+	friend class TWindow;
 
-public:
-	void VirtualProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
-	{
-		switch (message)
-		{
-		case WM_NCCREATE:
-		case WM_DPICHANGED_BEFOREPARENT:
-		{
-			__dpi = static_cast<double>(GetDpiForWindow(hwnd)) / USER_DEFAULT_SCREEN_DPI;
-			break;
-		}
-		case WM_DPICHANGED:
-		{
-			__dpi = static_cast<double>(HIWORD(wParam)) / USER_DEFAULT_SCREEN_DPI;
+	using ProcType = std::function<void(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)>;
 
-			RECT* const prcNewWindow = (RECT*)lParam;
-			SetWindowPos(hwnd,
-				NULL,
-				prcNewWindow->left,
-				prcNewWindow->top,
-				prcNewWindow->right - prcNewWindow->left,
-				prcNewWindow->bottom - prcNewWindow->top,
-				SWP_NOZORDER | SWP_NOACTIVATE);
-			break;
-		}
-		}
-	}
-
-public:
-	const double& dpi{ __dpi };
+protected:
+	std::vector<ProcType> _front_procs;
+	std::vector<ProcType> _back_procs;
 };
 
-#endif // TKERNEL_WINVER >= 1607
+#endif // TKERNEL_WINVER > 0
