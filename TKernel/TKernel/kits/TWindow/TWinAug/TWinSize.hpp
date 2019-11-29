@@ -20,13 +20,56 @@
 
 #pragma once
 
-#if TKERNEL_WINVER > 0
+#if TKERNEL_WINVER >= 1607
 
 #include "../../TStdInclude.hpp"
 
 #include "TWinAugBase.hpp"
 
-#include "TDPI.hpp"
-#include "TWinSize.hpp"
+namespace TWinAug
+{
+	///<summary>
+	/// 自动更新窗口客户区大小
+	///</summary>
+	class TWinSize : virtual public TAugProcBase
+	{
+		int __cx;
+		int __cy;
 
-#endif // TKERNEL_WINVER > 0
+	public:
+		void AugProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+		{
+			switch (message)
+			{
+			case WM_NCCREATE:
+			case WM_INITDIALOG:
+			{
+				RECT rect;
+				GetClientRect(hwnd, &rect);
+				__cx = rect.right - rect.left;
+				__cy = rect.bottom - rect.top;
+				break;
+			}
+			case WM_SIZE:
+				HANDLE_WM_SIZE(hwnd, wParam, lParam,
+					[this](HWND hwnd, UINT state, int cx, int cy)
+					{
+						__cx = cx;
+						__cy = cy;
+					});
+			}
+		}
+
+	public:
+		const int& width{ __cx };
+		const int& height{ __cy };
+
+	public:
+		TWinSize()
+		{
+			append_pre_proc(this);
+		}
+	};
+}
+
+#endif // TKERNEL_WINVER >= 1607

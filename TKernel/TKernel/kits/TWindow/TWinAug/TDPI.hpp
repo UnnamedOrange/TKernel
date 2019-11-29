@@ -26,46 +26,53 @@
 
 #include "TWinAugBase.hpp"
 
-class TDPI : virtual public TAugProcBase
+namespace TWinAug
 {
-	double __dpi{};
-
-public:
-	void AugProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+	///<summary>
+	/// 自动更新 dpi 参数，自动更新窗口大小
+	///</summary>
+	class TDPI : virtual public TAugProcBase
 	{
-		switch (message)
-		{
-		case WM_NCCREATE:
-		case WM_DPICHANGED_BEFOREPARENT:
-		{
-			__dpi = static_cast<double>(GetDpiForWindow(hwnd)) / USER_DEFAULT_SCREEN_DPI;
-			break;
-		}
-		case WM_DPICHANGED:
-		{
-			__dpi = static_cast<double>(HIWORD(wParam)) / USER_DEFAULT_SCREEN_DPI;
+		double __dpi{};
 
-			RECT* const prcNewWindow = (RECT*)lParam;
-			SetWindowPos(hwnd,
-				NULL,
-				prcNewWindow->left,
-				prcNewWindow->top,
-				prcNewWindow->right - prcNewWindow->left,
-				prcNewWindow->bottom - prcNewWindow->top,
-				SWP_NOZORDER | SWP_NOACTIVATE);
-			break;
-		}
-		}
-	}
+	public:
+		void AugProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+		{
+			switch (message)
+			{
+			case WM_NCCREATE:
+			case WM_INITDIALOG:
+			case WM_DPICHANGED_BEFOREPARENT:
+			{
+				__dpi = static_cast<double>(GetDpiForWindow(hwnd)) / USER_DEFAULT_SCREEN_DPI;
+				break;
+			}
+			case WM_DPICHANGED:
+			{
+				__dpi = static_cast<double>(HIWORD(wParam)) / USER_DEFAULT_SCREEN_DPI;
 
-public:
-	const double& dpi{ __dpi };
+				RECT* const prcNewWindow = (RECT*)lParam;
+				SetWindowPos(hwnd,
+					NULL,
+					prcNewWindow->left,
+					prcNewWindow->top,
+					prcNewWindow->right - prcNewWindow->left,
+					prcNewWindow->bottom - prcNewWindow->top,
+					SWP_NOZORDER | SWP_NOACTIVATE);
+				break;
+			}
+			}
+		}
 
-public:
-	TDPI()
-	{
-		append_pre_proc(this);
-	}
-};
+	public:
+		const double& dpi{ __dpi };
+
+	public:
+		TDPI()
+		{
+			append_pre_proc(this);
+		}
+	};
+}
 
 #endif // TKERNEL_WINVER >= 1607

@@ -290,6 +290,7 @@ public:
 
 	friend class TWindowNormal;
 	friend class TWindowDialogBox;
+	friend class TWindowCreateDialog;
 };
 
 class TWindowNormal : public TWindow
@@ -343,7 +344,7 @@ protected:
 public:
 	void property__dwExStyle__(DWORD dwExStyle) // 设置 dwExStyle 参数
 	{
-		property_int64(__dwExStyle__, static_cast<_int64>(dwExStyle));
+		property_int64(__dwExStyle__, static_cast<INT64>(dwExStyle));
 	}
 	DWORD property__dwExStyle__() const // 获取 dwExStyle 参数
 	{
@@ -359,7 +360,7 @@ public:
 	}
 	void property__dwStyle__(DWORD dwStyle) // 设置 dwStyle 参数
 	{
-		property_int64(__dwStyle__, static_cast<_int64>(dwStyle));
+		property_int64(__dwStyle__, static_cast<INT64>(dwStyle));
 	}
 	DWORD property__dwStyle__() const // 获取 dwStyle 参数
 	{
@@ -367,7 +368,7 @@ public:
 	}
 	void property__X__(int X) // 设置 X 参数
 	{
-		property_int64(__X__, static_cast<_int64>(X));
+		property_int64(__X__, static_cast<INT64>(X));
 	}
 	int property__X__() const // 获取 X 参数
 	{
@@ -375,7 +376,7 @@ public:
 	}
 	void property__Y__(int Y) // 设置 Y 参数
 	{
-		property_int64(__Y__, static_cast<_int64>(Y));
+		property_int64(__Y__, static_cast<INT64>(Y));
 	}
 	int property__Y__() const // 获取 Y 参数
 	{
@@ -383,7 +384,7 @@ public:
 	}
 	void property__nWidth__(int nWidth) // 设置 nWidth 参数
 	{
-		property_int64(__nWidth__, static_cast<_int64>(nWidth));
+		property_int64(__nWidth__, static_cast<INT64>(nWidth));
 	}
 	int property__nWidth__() const // 获取 nWidth 参数
 	{
@@ -391,7 +392,7 @@ public:
 	}
 	void property__nHeight__(int nHeight) // 设置 nHeight 参数
 	{
-		property_int64(__nHeight__, static_cast<_int64>(nHeight));
+		property_int64(__nHeight__, static_cast<INT64>(nHeight));
 	}
 	int property__nHeight__() const // 获取 nHeight 参数
 	{
@@ -399,7 +400,7 @@ public:
 	}
 	void property__hMenu__(HMENU hMenu) // 设置 hMenu 参数
 	{
-		property_int64(__hMenu__, reinterpret_cast<_int64>(hMenu));
+		property_int64(__hMenu__, reinterpret_cast<INT64>(hMenu));
 	}
 	HMENU property__hMenu__() const // 获取 hMenu 参数
 	{
@@ -441,7 +442,8 @@ public:
 public:
 	virtual INT_PTR __Create(HINSTANCE hInstance, HWND hwndParent) override
 	{
-		return DialogBoxParamW(hInstance, property__TemplateName__(), hwndParent, VirtualDialogProc, reinterpret_cast<LPARAM>(this));
+		return DialogBoxParamW(hInstance, property__lpTemplateName__(),
+			hwndParent, VirtualDialogProc, reinterpret_cast<LPARAM>(this));
 	}
 
 
@@ -449,11 +451,58 @@ public:
 protected:
 	std::wstring __lpTemplateName__{ L"__lpTemplateName__" };	// lpTemplateName
 public:
-	void property__TemplateName__(LPCWSTR lpTemplateName) // 设置 lpTemplateName 参数
+	void property__lpTemplateName__(LPCWSTR lpTemplateName) // 设置 lpTemplateName 参数
 	{
-		property_int64(__lpTemplateName__, reinterpret_cast<_int64>(lpTemplateName));
+		property_int64(__lpTemplateName__, reinterpret_cast<INT64>(lpTemplateName));
 	}
-	LPCWSTR property__TemplateName__() // 获取 lpTemplateName 参数
+	LPCWSTR property__lpTemplateName__() // 获取 lpTemplateName 参数
+	{
+		return reinterpret_cast<LPCWSTR>(property_int64(__lpTemplateName__));
+	}
+private:
+	void __InitPropertyDict()
+	{
+		property__register_classes__(false);
+		property__class_name__(L"#32770");
+	}
+};
+
+class TWindowCreateDialog : public TWindow
+{
+	// 回调函数
+	virtual LONG_PTR Proc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) override
+	{
+		return static_cast<LONG_PTR>(WndProc(hwnd, message, wParam, lParam));
+	}
+	virtual INT_PTR WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) = 0;
+
+
+	// Constructor
+public:
+	TWindowCreateDialog()
+	{
+		__InitPropertyDict();
+	}
+
+
+	// 创建窗口
+public:
+	virtual INT_PTR __Create(HINSTANCE hInstance, HWND hwndParent) override
+	{
+		return reinterpret_cast<INT_PTR>(CreateDialogParamW(hInstance, property__lpTemplateName__(),
+			hwndParent, VirtualDialogProc, reinterpret_cast<LPARAM>(this)));
+	}
+
+
+	// property 助手函数
+protected:
+	std::wstring __lpTemplateName__{ L"__lpTemplateName__" };	// lpTemplateName
+public:
+	void property__lpTemplateName__(LPCWSTR lpTemplateName) // 设置 lpTemplateName 参数
+	{
+		property_int64(__lpTemplateName__, reinterpret_cast<INT64>(lpTemplateName));
+	}
+	LPCWSTR property__lpTemplateName__() // 获取 lpTemplateName 参数
 	{
 		return reinterpret_cast<LPCWSTR>(property_int64(__lpTemplateName__));
 	}
