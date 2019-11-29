@@ -20,6 +20,11 @@
 
 #pragma once
 
+#pragma warning(push)
+#ifdef TKERNEL_DEV
+#pragma warning(disable:4100) // 未引用的形参
+#endif
+
 #ifndef TKERNEL_WINVER
 ///<summary>
 /// 对于 Windows 10，请按年份-月份指定版本；对于 Windows 10 以前版本，请使用 7、8；对于不依赖 Windows 的程序，请使用 0
@@ -65,3 +70,5 @@
 /// 面向对象窗口
 ///</summary>
 #include "TWindow/TWindow.hpp"
+
+#pragma warning(pop)

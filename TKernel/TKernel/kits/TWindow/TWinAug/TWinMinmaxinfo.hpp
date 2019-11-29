@@ -20,14 +20,37 @@
 
 #pragma once
 
-#if TKERNEL_WINVER > 0
-
 #include "../../TStdInclude.hpp"
 
 #include "TWinAugBase.hpp"
 
-#include "TDPI.hpp"
-#include "TWinSize.hpp"
-#include "TWinMinmaxinfo.hpp"
+namespace TWinAug
+{
+	///<summary>
+	/// 限制窗口的最小大小
+	///</summary>
+	class TWinMinmaxinfo : virtual public TAugProcBase
+	{
+		virtual POINT _QueryMinTrackSize() = 0;
 
-#endif // TKERNEL_WINVER > 0
+	public:
+		void AugProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+		{
+			switch (message)
+			{
+			case WM_GETMINMAXINFO:
+				HANDLE_WM_GETMINMAXINFO(hwnd, wParam, lParam,
+					[this](HWND hwnd, LPMINMAXINFO lpMinMaxInfo)
+					{
+						lpMinMaxInfo->ptMinTrackSize = _QueryMinTrackSize();
+					});
+			}
+		}
+
+	public:
+		TWinMinmaxinfo()
+		{
+			append_pre_proc(this);
+		}
+	};
+}

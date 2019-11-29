@@ -20,8 +20,6 @@
 
 #pragma once
 
-#if TKERNEL_WINVER >= 1607
-
 #include "../../TStdInclude.hpp"
 
 #include "TWinAugBase.hpp"
@@ -33,8 +31,8 @@ namespace TWinAug
 	///</summary>
 	class TWinSize : virtual public TAugProcBase
 	{
-		int __cx;
-		int __cy;
+		int __cx{};
+		int __cy{};
 
 	public:
 		void AugProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -71,5 +69,3 @@ namespace TWinAug
 		}
 	};
 }
-
-#endif // TKERNEL_WINVER >= 1607
