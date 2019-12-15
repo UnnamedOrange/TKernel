@@ -30,7 +30,7 @@ class _THANDLE final
 	HANDLE handle;
 
 public:
-	_THANDLE() : handle(invalid_value) {}
+	_THANDLE() : handle(reinterpret_cast<HANDLE>(invalid_value)) {}
 	_THANDLE(HANDLE free_handle) : handle(free_handle) {}
 	_THANDLE(const _THANDLE&) = delete;
 	_THANDLE(_THANDLE&& another)
@@ -52,7 +52,7 @@ public:
 	///<summary>
 	/// 返回当前句柄是否无效
 	///</summary>
-	bool invalid() const { return handle == invalid_value; }
+	bool invalid() const { return handle == reinterpret_cast<HANDLE>(invalid_value); }
 	///<summary>
 	/// 返回当前句柄是否有效
 	///</summary>
@@ -68,7 +68,7 @@ public:
 	{
 		if (valid())
 			CloseHandle(handle);
-		handle = invalid_value;
+		handle = reinterpret_cast<HANDLE>(invalid_value);
 	}
 	///<summary>
 	/// 将当前句柄设为新的句柄
@@ -84,7 +84,7 @@ public:
 	HANDLE release()
 	{
 		auto ret = handle;
-		handle = invalid_value;
+		handle = reinterpret_cast<HANDLE>(invalid_value);
 		return ret;
 	}
 	///<summary>
