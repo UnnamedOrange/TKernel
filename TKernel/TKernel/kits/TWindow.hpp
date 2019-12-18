@@ -32,7 +32,7 @@ class TWindow : virtual public TAugProcBase
 private:
 	HWND __hwnd;
 public:
-	// 获取窗口句柄。
+	// 获取窗口句柄
 	HWND GetHwnd() const { return __hwnd; }
 
 
@@ -122,7 +122,7 @@ public:
 		return reinterpret_cast<HICON>(property_int64(__hIconSm__));
 	}
 private:
-	// 初始化
+	// 初始化。
 	void __InitPropertyDict()
 	{
 		property__class_name__(__GetIdentity().second);
