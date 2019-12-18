@@ -22,12 +22,12 @@
 
 #if TKERNEL_WINVER > 0
 
-#include "../../TStdInclude.hpp"
+#include "TStdInclude.hpp"
 
-#include "TWinAugBase.hpp"
+#include "TWinAug/TWinAugBase.hpp"
 
-#include "TDPI.hpp"
-#include "TWinSize.hpp"
-#include "TWinMinmaxinfo.hpp"
+#include "TWinAug/TDPI.hpp"
+#include "TWinAug/TWinSize.hpp"
+#include "TWinAug/TWinMinmaxinfo.hpp"
 
 #endif // TKERNEL_WINVER > 0

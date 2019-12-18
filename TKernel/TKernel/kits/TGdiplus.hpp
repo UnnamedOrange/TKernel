@@ -28,7 +28,7 @@ class TGdiplus final
 {
 	ULONG_PTR gdiplusToken{};
 	BOOL isLoaded{};
-	VOID Startup()
+	void Startup()
 	{
 		if (isLoaded) return;
 		Gdiplus::GdiplusStartupInput gdiplusStartupInput;
@@ -47,9 +47,7 @@ public:
 		}
 	}
 
-	///<summary>
-	/// 在程序开始执行时调用该函数即可启用 GDIP。TGdiplus 将自动关闭 Gdiplus。
-	///</summary>
+	// 在程序开始执行时调用该函数即可启用 GDIP。TGdiplus 将自动关闭 Gdiplus。
 	static VOID EnableGdiplus()
 	{
 		static TGdiplus instance;
@@ -57,4 +55,4 @@ public:
 	}
 };
 
-#endif // TKERNEL_GDIPVER > 0
+#endif // TKERNEL_WINVER > 0 && TKERNEL_GDIPVER > 0

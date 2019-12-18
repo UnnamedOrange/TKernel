@@ -20,20 +20,15 @@
 
 #pragma once
 
-#if TKERNEL_WINVER >= 1607
-
-#include "../../TStdInclude.hpp"
-
 #include "TWinAugBase.hpp"
 
 namespace TWinAug
 {
-	///<summary>
-	/// 自动更新 dpi 参数，自动更新窗口大小
-	///</summary>
-	class TDPI : virtual public TAugProcBase
+	// 自动更新窗口客户区大小
+	class TWinSize : virtual public TAugProcBase
 	{
-		double __dpi{};
+		int __cx{};
+		int __cy{};
 
 	public:
 		void AugProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -42,37 +37,31 @@ namespace TWinAug
 			{
 			case WM_NCCREATE:
 			case WM_INITDIALOG:
-			case WM_DPICHANGED_BEFOREPARENT:
 			{
-				__dpi = static_cast<double>(GetDpiForWindow(hwnd)) / USER_DEFAULT_SCREEN_DPI;
+				RECT rect;
+				GetClientRect(hwnd, &rect);
+				__cx = rect.right - rect.left;
+				__cy = rect.bottom - rect.top;
 				break;
 			}
-			case WM_DPICHANGED:
-			{
-				__dpi = static_cast<double>(HIWORD(wParam)) / USER_DEFAULT_SCREEN_DPI;
-
-				RECT* const prcNewWindow = (RECT*)lParam;
-				SetWindowPos(hwnd,
-					NULL,
-					prcNewWindow->left,
-					prcNewWindow->top,
-					prcNewWindow->right - prcNewWindow->left,
-					prcNewWindow->bottom - prcNewWindow->top,
-					SWP_NOZORDER | SWP_NOACTIVATE);
-				break;
-			}
+			case WM_SIZE:
+				HANDLE_WM_SIZE(hwnd, wParam, lParam,
+					[this](HWND hwnd, UINT state, int cx, int cy)
+					{
+						__cx = cx;
+						__cy = cy;
+					});
 			}
 		}
 
 	public:
-		const double& dpi{ __dpi };
+		const int& width{ __cx };
+		const int& height{ __cy };
 
 	public:
-		TDPI()
+		TWinSize()
 		{
 			append_pre_proc(this);
 		}
 	};
 }
-
-#endif // TKERNEL_WINVER >= 1607

@@ -21,54 +21,27 @@
 #pragma once
 
 #pragma warning(push)
+
 #ifdef TKERNEL_DEV
 #pragma warning(disable:4100) // 未引用的形参
 #endif
 
 #ifndef TKERNEL_WINVER
-///<summary>
-/// 对于 Windows 10，请按年份-月份指定版本；对于 Windows 10 以前版本，请使用 7、8；对于不依赖 Windows 的程序，请使用 0
-///</summary>
+// 对于 Windows 10，请按年份-月份指定版本；对于 Windows 10 以前版本，请使用 7、8；对于不依赖 Windows 的程序，请使用 0
 #define TKERNEL_WINVER 1903
 #endif // TKERNEL_WINVER
 
 #if TKERNEL_WINVER > 0
 #ifndef TKERNEL_GDIPVER
-///<summary>
-/// 对于 GDIP 1.0，请使用 10；对于 GDIP 1.1，请使用 11；对于不使用 GDIP 的程序，请使用 0
-///</summary>
+// 对于 GDIP 1.0，请使用 10；对于 GDIP 1.1，请使用 11；对于不使用 GDIP 的程序，请使用 0
 #define TKERNEL_GDIPVER 11
 #endif // TKERNEL_GDIPVER
 #endif // TKERNEL_WINVER
 
-///<summary>
-/// TStdInclude <version>Alpha 10.0</version>
-/// 包含所有的头文件
-///<summary>
 #include "TStdInclude.hpp"
-
-///<summary>
-/// TSmartObject <version>Alpha 10.0</version>
-/// 操作系统智能对象
-///</summary>
-#include "TSmartObject/TSmartObject.hpp"
-
-///<summary>
-/// TApplication <version>Alpha 10.0</version>
-/// 应用程序的入口
-///</summary>
-#include "TApplication.hpp"
-
-///<summary>
-/// TGdiplus <version>Alpha 10.0</version>
-/// GDIP 加载器
-///</summary>
+#include "TSmartObject.hpp"
 #include "TGdiplus.hpp"
-
-///<summary>
-/// TWindow <version>Alpha 10.0</version>
-/// 面向对象窗口
-///</summary>
-#include "TWindow/TWindow.hpp"
+#include "TApplication.hpp"
+#include "TWindow.hpp"
 
 #pragma warning(pop)

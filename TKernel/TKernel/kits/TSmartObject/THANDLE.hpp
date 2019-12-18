@@ -24,19 +24,19 @@
 
 #include "../TStdInclude.hpp"
 
-template <UINT_PTR invalid_value = NULL>
+template <UINT_PTR invalid_handle = NULL>
 class _THANDLE final
 {
 	HANDLE handle;
 
 public:
-	_THANDLE() : handle(reinterpret_cast<HANDLE>(invalid_value)) {}
+	_THANDLE() : handle(reinterpret_cast<HANDLE>(invalid_handle)) {}
 	_THANDLE(HANDLE free_handle) : handle(free_handle) {}
 	_THANDLE(const _THANDLE&) = delete;
 	_THANDLE(_THANDLE&& another)
 	{
 		handle = another.handle;
-		another.handle = invalid_value;
+		another.handle = invalid_handle;
 	}
 	~_THANDLE()
 	{
@@ -49,47 +49,33 @@ public:
 		return *this;
 	}
 
-	///<summary>
-	/// 返回当前句柄是否无效
-	///</summary>
-	bool invalid() const { return handle == reinterpret_cast<HANDLE>(invalid_value); }
-	///<summary>
-	/// 返回当前句柄是否有效
-	///</summary>
+	// 返回当前句柄是否无效。
+	bool invalid() const { return handle == reinterpret_cast<HANDLE>(invalid_handle); }
+	// 返回当前句柄是否有效。
 	bool valid() const { return !invalid(); }
-	///<summary>
-	/// 返回当前句柄是否有效
-	///</summary>
+	// 返回当前句柄是否有效。
 	operator bool const() { return valid(); }
-	///<summary>
-	/// 清空当前句柄
-	///</summary>
+	/// 清空当前句柄。
 	void reset()
 	{
 		if (valid())
 			CloseHandle(handle);
-		handle = reinterpret_cast<HANDLE>(invalid_value);
+		handle = reinterpret_cast<HANDLE>(invalid_handle);
 	}
-	///<summary>
-	/// 将当前句柄设为新的句柄
-	///</summary>
+	// 将当前句柄设为新的句柄。
 	void reset(HANDLE free_handle)
 	{
 		reset();
 		handle = free_handle;
 	}
-	///<summary>
-	/// 不再使用该智能对象管理当前句柄
-	///</summary>
+	// 不再使用该智能对象管理当前句柄。
 	HANDLE release()
 	{
 		auto ret = handle;
-		handle = reinterpret_cast<HANDLE>(invalid_value);
+		handle = reinterpret_cast<HANDLE>(invalid_handle);
 		return ret;
 	}
-	///<summary>
-	/// 返回当前句柄
-	///</summary>
+	// 返回当前句柄
 	HANDLE get()
 	{
 		return handle;

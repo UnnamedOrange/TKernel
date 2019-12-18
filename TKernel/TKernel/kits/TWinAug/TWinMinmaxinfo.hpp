@@ -20,37 +20,33 @@
 
 #pragma once
 
-#if TKERNEL_WINVER > 0
+#include "TWinAugBase.hpp"
 
-#include "../../TStdInclude.hpp"
-
-///<summary>
-/// TAugProcBase
-/// 继承该类后，编写名为 WndProc 或 AugProc 的函数。
-///</summary>
-class TAugProcBase
+namespace TWinAug
 {
-	friend class TWindow;
-
-	using AugProcType = std::function<void(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)>;
-	std::vector<AugProcType> __pre_procs;
-	std::vector<AugProcType> __post_procs;
-
-protected:
-	template<typename T>
-	void append_pre_proc(T* _this)
+	// 限制窗口的最小大小
+	class TWinMinmaxinfo : virtual public TAugProcBase
 	{
-		__pre_procs.push_back(std::bind(&T::AugProc, _this,
-			std::placeholders::_1, std::placeholders::_2,
-			std::placeholders::_3, std::placeholders::_4));
-	}
-	template<typename T>
-	void append_post_proc(T* _this)
-	{
-		__post_procs.push_back(std::bind(&T::AugProc, _this,
-			std::placeholders::_1, std::placeholders::_2,
-			std::placeholders::_3, std::placeholders::_4));
-	}
-};
+		virtual POINT _QueryMinTrackSize() = 0;
 
-#endif // TKERNEL_WINVER > 0
+	public:
+		void AugProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+		{
+			switch (message)
+			{
+			case WM_GETMINMAXINFO:
+				HANDLE_WM_GETMINMAXINFO(hwnd, wParam, lParam,
+					[this](HWND hwnd, LPMINMAXINFO lpMinMaxInfo)
+					{
+						lpMinMaxInfo->ptMinTrackSize = _QueryMinTrackSize();
+					});
+			}
+		}
+
+	public:
+		TWinMinmaxinfo()
+		{
+			append_pre_proc(this);
+		}
+	};
+}

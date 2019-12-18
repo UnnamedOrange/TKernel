@@ -24,8 +24,9 @@
 
 #include "TStdInclude.hpp"
 
-#include "TSmartObject/TSmartObject.hpp"
+#include "TSmartObject.hpp"
 
+template <typename AppType>
 class TApplication
 {
 	//public:
@@ -47,46 +48,36 @@ class TApplication
 	//		return block;
 	//	}
 
-	///<summary>
-	/// hInstance
-	///</summary>
 private:
 	HINSTANCE __hInstance{};
 public:
 	const HINSTANCE& hInstance{ __hInstance };
 
-	///<summary>
-	/// 当前 TApplication 实例
-	///</summary>
 public:
-	///<summary>
-	/// 将此函数看作应用程序入口
-	///</summary>
+	// 将此函数看作应用程序入口。
 	virtual int OnExecute() = 0;
+	// 访问当前实例地址。
 	static PVOID& __access_instance()
 	{
 		static PVOID _;
 		return _;
 	}
 public:
-	template <typename AppType>
 	static AppType& App()
 	{
 		return *(reinterpret_cast<AppType*>(__access_instance()));
 	}
-	template<typename AppType>
 	static int Execute(HINSTANCE hInstance = GetModuleHandleW(nullptr))
 	{
 		auto t = std::make_unique<AppType>(hInstance);
 		__access_instance() = t.get();
 		int ret = t->OnExecute();
+		t.reset();
 		__access_instance() = nullptr;
 		return ret;
 	}
 
-	///<summary>
-	/// 命令行
-	///</summary>
+	// 命令行。
 private:
 	std::vector<std::wstring> __CommandLine;
 private:
@@ -102,9 +93,7 @@ private:
 public:
 	const std::vector<std::wstring>& GetCmdLine() const { return __CommandLine; }
 
-	///<summary>
-	/// 应用程序版本信息
-	///</summary>
+	// 应用程序版本信息。
 private:
 	std::tuple<int, int, int, int> VersionInfo{};
 	void __QueryAppVersionInfo()
@@ -135,9 +124,7 @@ public:
 		return VersionInfo;
 	}
 
-	///<summary>
-	/// 应用程序单例运行
-	///</summary>
+	// 应用程序单例运行。
 private:
 	THANDLE __hMutex;
 	THANDLE __hMapFile;
@@ -160,9 +147,7 @@ public:
 
 		}
 	};
-	///<summary>
-	/// 要求应用程序在用户级单例启动，否则抛出 TApplication::SingleInstance 异常
-	///</summary>
+	// 要求应用程序在用户级单例启动，否则抛出 TApplication::SingleInstance 异常。
 	void DemandSingleInstance()
 	{
 		if (__hMutex)

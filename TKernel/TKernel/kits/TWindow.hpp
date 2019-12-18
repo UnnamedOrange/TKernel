@@ -22,9 +22,9 @@
 
 #if TKERNEL_WINVER > 0
 
-#include "../TStdInclude.hpp"
+#include "TStdInclude.hpp"
 
-#include "TWinAug/TWinAug.hpp"
+#include "TWinAug.hpp"
 
 class TWindow : virtual public TAugProcBase
 {
@@ -32,9 +32,7 @@ class TWindow : virtual public TAugProcBase
 private:
 	HWND __hwnd;
 public:
-	///<summary>
-	/// 获取窗口句柄
-	///</summary>
+	// 获取窗口句柄。
 	HWND GetHwnd() const { return __hwnd; }
 
 
@@ -137,9 +135,7 @@ private:
 
 	// 类标识（使用虚函数表）
 private:
-	///<summary>
-	/// 返回类标识。first 是虚函数表指针，second 是推荐的默认窗口类名
-	///</summary>
+	/// 返回类标识。first 是虚函数表指针，second 是推荐的默认窗口类名。
 	std::pair<PVOID, std::wstring> __GetIdentity() const
 	{
 		auto vptr = *((PVOID*)this); // 取 this 指向的内容的前 8 个字节，即虚函数表的指针
@@ -151,9 +147,7 @@ private:
 
 	// 创建窗口类
 private:
-	///<summary>
-	/// 在创建时会尝试自动注册
-	///</summary>
+	// 在创建时会尝试自动注册。
 	void __RegisterClasses(HINSTANCE hInstance)
 	{
 		if (property__register_classes__())

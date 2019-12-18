@@ -22,8 +22,8 @@
 
 #if TKERNEL_WINVER > 0
 
-#include "../TStdInclude.hpp"
+#include "TStdInclude.hpp"
 
-#include "THANDLE.hpp"
+#include "TSmartObject/THANDLE.hpp"
 
 #endif // TKERNEL_WINVER > 0
