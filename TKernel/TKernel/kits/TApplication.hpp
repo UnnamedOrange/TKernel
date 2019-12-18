@@ -70,9 +70,11 @@ public:
 	static int Execute(HINSTANCE hInstance = GetModuleHandleW(nullptr))
 	{
 		auto t = std::make_unique<AppType>(hInstance);
+		if (__access_instance())
+			throw std::runtime_error("Only one Execute() should be running at a time.");
 		__access_instance() = t.get();
 		int ret = t->OnExecute();
-		t.reset();
+		t.reset(); // 及时调用析构函数
 		__access_instance() = nullptr;
 		return ret;
 	}
@@ -95,7 +97,7 @@ public:
 
 	// 应用程序版本信息。
 private:
-	std::tuple<int, int, int, int> VersionInfo{};
+	std::array<int, 4> VersionInfo{};
 	void __QueryAppVersionInfo()
 	{
 		VS_FIXEDFILEINFO* pffi;
@@ -106,17 +108,17 @@ private:
 		GetModuleFileNameW(hInstance, strFileName.data(), 65536);
 		DWORD dwSize = GetFileVersionInfoSizeW(strFileName.data(), &dwHandle);
 		if (!dwSize)
-			return void(VersionInfo = std::tuple<int, int, int, int>(1, 0, 0, 0));
+			return void(VersionInfo = std::array<int, 4>{1, 0, 0, 0});
 		auto pBlock = std::make_unique<BYTE[]>(dwSize);
 		GetFileVersionInfoW(strFileName.data(), 0, dwSize, pBlock.get());
 		// dwSize is no longer used
 		VerQueryValueW(pBlock.get(), L"\\", (LPVOID*)&pffi, (PUINT)&dwSize);
 
-		return void(VersionInfo = std::tuple<int, int, int, int>
-			(HIWORD(pffi->dwProductVersionMS),
+		return void(VersionInfo = std::array<int, 4>{
+			HIWORD(pffi->dwProductVersionMS),
 				LOWORD(pffi->dwProductVersionMS),
 				HIWORD(pffi->dwProductVersionLS),
-				LOWORD(pffi->dwProductVersionLS)));
+				LOWORD(pffi->dwProductVersionLS)});
 	}
 public:
 	const auto& GetAppVersion() const

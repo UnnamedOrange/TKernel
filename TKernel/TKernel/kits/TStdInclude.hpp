@@ -36,6 +36,7 @@
 // STL
 #include <iostream>
 #include <algorithm>
+#include <array>
 #include <vector>
 #include <string>
 #include <sstream>
