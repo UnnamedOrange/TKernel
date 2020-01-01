@@ -22,5 +22,6 @@
 #include "TGdiplus.hpp"
 #include "TApplication.hpp"
 #include "TWindow.hpp"
+#include "TDirect2D.hpp"
 
 #pragma warning(pop)
