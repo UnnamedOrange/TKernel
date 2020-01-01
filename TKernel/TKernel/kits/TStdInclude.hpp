@@ -71,9 +71,6 @@
 
 #endif // TKERNEL_WINVER > 0
 
-#include <d2d1.h>
-#include <d2d1_1.h>
-
 // Common Control 6.0
 #if defined _M_IX86
 #pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='x86' publicKeyToken='6595b64144ccf1df' language='*'\"")
@@ -92,7 +89,6 @@
 #pragma comment(lib, "comctl32.lib")
 #pragma comment(lib, "shell32.lib")
 #pragma comment(lib, "dwmapi.lib")
-#pragma comment(lib, "d2d1.lib")
 #pragma comment(lib, "gdiplus.lib")
 
 #endif // TKERNEL_WINVER > 0
