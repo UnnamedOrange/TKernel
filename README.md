@@ -2,18 +2,18 @@
 
 # TKernel
 
-## TKernel 是什么
-
-*TKernel* 是一套用于加速 Windows 平台下的 C++ 开发的头文件。
-
 ## 如何使用 TKernel
 
 ```c++
-#include "TKernel.hpp" // However, you need to input the correct directory of it.
+#include "kits/TKernel.hpp" // However, you need to input the correct directory of it.
 ```
 
 ## 关于
 
-Powered by: Orange Lee
+TKernel 处于测试阶段，接口随时可能改变。
 
-Version: Alpha 10.0
+## License
+
+Copyright (c) Orange Lee. Licensed under the MIT Licence.
+
+See the LICENCE file in the repository root for full licence text.
