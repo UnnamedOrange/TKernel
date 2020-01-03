@@ -4,44 +4,100 @@
 #pragma once
 
 #pragma warning(push)
-#pragma warning(disable:4458)
+#pragma warning(disable:4458) // Gdiplus 声明隐藏了类成员
 
-// CRT
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-#include <cstring>
+// C Library
 #include <cassert>
-#include <climits>
-#include <cctype>
-#include <ctime>
+#include <cctype> 
+#include <cerrno> 
+#include <cfenv> 
+#include <cfloat> 
+#include <cinttypes>
+#include <ciso646> 
+#include <climits> 
+#include <clocale> 
+#include <cmath> 
+#include <csetjmp> 
+#include <csignal> 
+#include <cstdarg> 
+#include <cstdbool> 
+#include <cstddef>
+#include <cstdint>
+#include <cstdio> 
+#include <cstdlib>
+#include <cstring>
+#include <ctgmath>
+#include <ctime> 
+#include <cuchar> 
+#include <cwchar> 
+#include <cwctype>
 
-// STL
-#include <iostream>
-#include <algorithm>
+// Containers
 #include <array>
-#include <vector>
-#include <string>
-#include <sstream>
-#include <stack>
-#include <queue>
-#include <deque>
-#include <map>
-#include <set>
 #include <bitset>
+#include <deque>
+#include <forward_list>
 #include <list>
+#include <map>
+#include <queue>
+#include <set>
+#include <stack>
 #include <unordered_map>
 #include <unordered_set>
-#include <functional>
-#include <random>
-#include <stdexcept>
-#include <typeinfo>
+#include <vector>
+
+// Input/Output Stream Library
+#include <iostream>
+#include <fstream>
+#include <sstream>
+
+// Atomics and threading library
+#include <atomic>
+#include <condition_variable>
+#include <future>
+#include <mutex>
 #include <thread>
+
+// Miscellaneous headers
+#include <algorithm>
 #include <chrono>
+#include <codecvt>
+#include <complex>
+#include <exception>
+#include <functional>
+#include <initializer_list>
+#include <iterator>
+#include <limits>
+#include <locale>
+#include <memory>
+#include <new>
+#include <numeric>
+#include <random>
+#include <ratio>
+#include <regex>
+#include <stdexcept>
+#include <string>
+#include <system_error>
+#include <tuple>
+#include <typeindex>
+#include <typeinfo>
+#include <type_traits>
+#include <utility>
+#include <valarray>
+
+// CXX17
 #if _HAS_CXX17
 #include <optional>
+#include <any>
+#include <variant>
+#include <string_view>
 #include <filesystem>
 #endif // _HAS_CXX17
+
+// CXX20
+#if _HAS_CXX20
+
+#endif // _HAS_CXX20
 
 #if TKERNEL_WINVER > 0
 
