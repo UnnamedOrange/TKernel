@@ -8,28 +8,26 @@
 
 // C Library
 #include <cassert>
-#include <cctype> 
-#include <cerrno> 
-#include <cfenv> 
-#include <cfloat> 
+#include <cctype>
+#include <cerrno>
+#include <cfenv>
+#include <cfloat>
 #include <cinttypes>
-#include <ciso646> 
-#include <climits> 
-#include <clocale> 
-#include <cmath> 
-#include <csetjmp> 
-#include <csignal> 
-#include <cstdarg> 
-#include <cstdbool> 
+#include <ciso646>
+#include <climits>
+#include <clocale>
+#include <cmath>
+#include <csetjmp>
+#include <csignal>
+#include <cstdarg>
 #include <cstddef>
 #include <cstdint>
-#include <cstdio> 
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <ctgmath>
-#include <ctime> 
-#include <cuchar> 
-#include <cwchar> 
+#include <ctime>
+#include <cuchar>
+#include <cwchar>
 #include <cwctype>
 
 // Containers
@@ -110,7 +108,7 @@
 #include <tlhelp32.h>
 #include <commctrl.h>
 #include <commdlg.h>
-#include <shellapi.h> 
+#include <shellapi.h>
 #include <shlobj.h>
 #include <shldisp.h>
 #include <Psapi.h>
