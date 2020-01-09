@@ -328,11 +328,3 @@ ASALocalRun/
 
 # MFractors (Xamarin productivity tool) working folder 
 .mfractor/
-TKernel/TKernel.sln
-TKernel/TKernel/demo.cpp
-TKernel/TKernel/demo.h
-TKernel/TKernel/multisource.cpp
-TKernel/TKernel/resource.h
-TKernel/TKernel/Resource.rc
-TKernel/TKernel/TKernel.vcxproj
-TKernel/TKernel/TKernel.vcxproj.filters

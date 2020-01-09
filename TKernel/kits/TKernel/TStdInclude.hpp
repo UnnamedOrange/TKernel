@@ -90,6 +90,7 @@
 #include <variant>
 #include <string_view>
 #include <filesystem>
+#include <execution>
 #endif // _HAS_CXX17
 
 // CXX20

@@ -5,7 +5,7 @@
 ## 如何使用 TKernel
 
 ```c++
-#include "kits/TKernel.hpp" // However, you need to input the correct directory of it.
+#include "kits/TKernel/TKernel.hpp" // 需要在项目中设置额外包含目录。
 ```
 
 ## 关于
