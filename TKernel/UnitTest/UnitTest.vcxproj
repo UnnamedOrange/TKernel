@@ -164,6 +164,7 @@
     </ClCompile>
     <ClCompile Include="Test_TDirect2D.cpp" />
     <ClCompile Include="Test_THANDLE.cpp" />
+    <ClCompile Include="Test_TMessageThread.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />

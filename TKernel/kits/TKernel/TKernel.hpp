@@ -23,5 +23,6 @@
 #include "TApplication.hpp"
 #include "TWindow.hpp"
 #include "TDirect2D.hpp"
+#include "TMessageThread.hpp"
 
 #pragma warning(pop)
