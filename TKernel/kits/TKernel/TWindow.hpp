@@ -116,9 +116,18 @@ private:
 		property__hIconSm__(nullptr);
 	}
 
+	// 根据窗口句柄获取 TWindow 结构
+public:
+	template <typename Window_Type>
+	static Window_Type* hwnd_to_window(HWND hwnd)
+	{
+		return reinterpret_cast<Window_Type*>(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
+	}
+
+
 	// 类标识（使用虚函数表）
 private:
-	/// 返回类标识。first 是虚函数表指针，second 是推荐的默认窗口类名。
+	// 返回类标识。first 是虚函数表指针，second 是推荐的默认窗口类名。
 	std::pair<PVOID, std::wstring> __GetIdentity() const
 	{
 		auto vptr = *((PVOID*)this); // 取 this 指向的内容的前 8 个字节，即虚函数表的指针
