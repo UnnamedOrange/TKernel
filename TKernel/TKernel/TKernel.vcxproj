@@ -159,6 +159,7 @@
     <ClInclude Include="..\kits\TKernel\TDirect2D.hpp" />
     <ClInclude Include="..\kits\TKernel\TGdiplus.hpp" />
     <ClInclude Include="..\kits\TKernel\TKernel.hpp" />
+    <ClInclude Include="..\kits\TKernel\TMessageThread.hpp" />
     <ClInclude Include="..\kits\TKernel\TSmartObject.hpp" />
     <ClInclude Include="..\kits\TKernel\TSmartObject\THANDLE.hpp" />
     <ClInclude Include="..\kits\TKernel\TStdInclude.hpp" />
