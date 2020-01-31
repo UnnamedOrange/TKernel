@@ -77,9 +77,6 @@
     <ClInclude Include="..\kits\TKernel\TSmartObject\THANDLE.hpp">
       <Filter>头文件\kits\TSmartObject</Filter>
     </ClInclude>
-    <ClInclude Include="..\kits\TKernel\TMessageThread.hpp">
-      <Filter>头文件\kits</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resource.rc">
