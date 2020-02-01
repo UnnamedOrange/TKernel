@@ -7,7 +7,7 @@
 
 #include "TStdInclude.hpp"
 
-class TMessageThread final
+class TMessageThread
 {
 	std::thread __thread;
 	std::condition_variable __cv;
@@ -58,7 +58,7 @@ public:
 	void post_message(UINT message, std::any param)
 	{
 		std::lock_guard<std::mutex> _(__mutex);
-		__queue.push(std::make_pair(message, param));
+		__queue.push(std::make_pair(message, std::move(param)));
 		__cv.notify_one();
 	}
 };
