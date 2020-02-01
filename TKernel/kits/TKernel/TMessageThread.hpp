@@ -3,53 +3,64 @@
 
 #pragma once
 
-#if TKERNEL_WINVER > 0
+#if _CRT_HAS_CXX17
 
 #include "TStdInclude.hpp"
 
-class TMessageThread final
+class TMessageThread
 {
 	std::thread __thread;
-	std::mutex __mutex;
 	std::condition_variable __cv;
-	std::atomic<bool> constructed{};
+	std::atomic<bool> __destructed{};
+
+	std::mutex __mutex;
+	std::queue<std::pair<UINT, std::any>> __queue;
 
 	void internal_proc()
 	{
-		MSG msg;
-		PeekMessageW(&msg, NULL, WM_USER, WM_USER, PM_NOREMOVE);
-		constructed = true;
-		__cv.notify_one();
-		while (GetMessageW(&msg, nullptr, 0, 0))
+		while (true)
 		{
-			f(msg.message, msg.wParam, msg.lParam);
+			std::unique_lock<std::mutex> lock(__mutex);
+			__cv.wait(lock, [this]()->bool
+				{
+					return __queue.size() || __destructed;
+				});
+
+			if (__queue.empty() && __destructed)
+				break;
+
+			auto msg = std::move(__queue.front());
+			__queue.pop();
+			lock.unlock();
+			f(msg.first, std::move(msg.second));
 		}
 	}
 
-	using proc = std::function<void(UINT, WPARAM, LPARAM)>;
+	using proc = std::function<void(UINT, std::any)>;
 	proc f;
 
 public:
-	TMessageThread(proc f) :
-		f(f)
+	TMessageThread(proc f) : f(f)
 	{
 		__thread = std::move(std::thread(&TMessageThread::internal_proc, this));
-		std::unique_lock<std::mutex> lock(__mutex);
-		__cv.wait(lock, [&]()->bool { return constructed; });
 	}
 	~TMessageThread()
 	{
-		post_message(WM_QUIT, 0, 0);
+		__destructed = true;
+		__cv.notify_one();
 		if (__thread.joinable())
 			__thread.join();
-		constructed = false;
+		__queue = std::move(std::queue<std::pair<UINT, std::any>>());
+		__destructed = false;
 	}
 
 public:
-	void post_message(UINT message, WPARAM wParam, LPARAM lParam)
+	void post_message(UINT message, std::any param)
 	{
-		PostThreadMessageW(*reinterpret_cast<DWORD*>(&__thread.get_id()), message, wParam, lParam);
+		std::lock_guard<std::mutex> _(__mutex);
+		__queue.push(std::make_pair(message, std::move(param)));
+		__cv.notify_one();
 	}
 };
 
-#endif // TKERNEL_WINVER > 0
+#endif // _CRT_HAS_CXX17
